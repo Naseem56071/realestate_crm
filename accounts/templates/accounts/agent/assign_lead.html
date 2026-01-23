@@ -1,0 +1,48 @@
+{% extends 'accounts/agent_dashboard.html' %}
+
+{% block title %}
+<title>agent assign task</title>
+{% endblock title %}
+
+{% block agent_tasks %}
+
+
+
+<div class="container assign_task mt-4">
+    <h3>Assign Task</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label>Task Title</label>
+            <input type="text" name="title" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label>Description</label>
+            <textarea name="description" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="start_time">Start Date & Time</label>
+            <input type="datetime-local" name="start_time" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Assign to Associate</label>
+            <select name="associate" class="form-control">
+                <option value="">-- Select Associate --</option>
+                {% for associate in associates %}
+                <option value="{{ associate.id }}">
+                    {{ associate.id }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary my-2">
+            Assign Task
+        </button>
+    </form>
+</div>
+{% endblock agent_tasks %}

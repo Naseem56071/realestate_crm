@@ -1,0 +1,55 @@
+{% extends 'accounts/associate.html' %}
+{% load tz %}
+
+{% block title %}
+<title>Update Task</title>
+{% endblock title %}
+
+{% block agent_tasks %}
+
+<div class="container assign_task mt-4">
+    <h3>Update Task Status</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label>Description</label>
+            <textarea name="description" class="form-control">{{ tasks.description }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label>update  Date & Time</label>
+            <input type="datetime-local" name="start_time" value="{{ tasks.start_time|localtime|date:'d M Y, h:i A' }}"
+                class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label>Status</label>
+            <select name="status" class="form-select" required>
+                <option value="">Select status</option>
+
+                <option value="pending" {% if tasks.status == 'pending' %}selected{% endif %}>
+                    Pending
+                </option>
+
+                <option value="in_progress" {% if tasks.status == 'in_progress' %}selected{% endif %}>
+                    In Progress
+                </option>
+
+                <option value="completed" {% if tasks.status == 'completed' %}selected{% endif %}>
+                    Completed
+                </option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary my-2">
+            Update Task
+        </button>
+        <button type="reset" class="btn btn-secondary my-2">
+            Reset Task
+        </button>
+    </form>
+</div>
+
+{% endblock agent_tasks %}

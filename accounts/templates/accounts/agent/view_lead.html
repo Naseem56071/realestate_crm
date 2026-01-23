@@ -1,0 +1,67 @@
+{% extends 'accounts/agent_dashboard.html' %}
+
+{% block title %}
+
+<title>agent view task</title>
+{% endblock title %}
+
+{% block agent_tasks %}
+
+<div class="table-responsive">
+  <table class="table table-bordered table-hover align-middle text-center">
+    <thead class="table-dark">
+      <tr>
+        <th>#</th>
+        <th>Title</th>
+        <th>description</th>
+        <th>assgined date & time</th>
+        <th>Associate</th>
+        <th>Status</th>
+        <th>actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for task in tasks %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td class="text-start">{{ task.title }}</td>
+        <td>{{ task.description }}</td>
+        <td>{{ task.created_at }}</td>
+        <td>{{ task.associate.email }}</td>
+        <td>
+          {% if task.status == 'pending' %}
+          <span class="badge bg-warning text-dark">Pending</span>
+          {% elif task.status == 'in_progress' %}
+          <span class="badge bg-info text-dark">In Progress</span>
+          {% elif task.status == 'completed' %}
+          <span class="badge bg-success">Completed</span>
+          {% else %}
+          <span class="badge bg-secondary">{{ task.status }}</span>
+          {% endif %}
+        </td>
+         <td class="text-center">
+          <a href="{% url 'agent.update_task.dashboard' task.id %}" class="btn btn-sm btn-outline-primary me-1" title="Edit Task">
+           <i class="bi bi-pencil-square"></i>
+          </a>
+
+          <a href="{% url 'agent.delete_task.dashboard' task.id %}" class="btn btn-sm btn-outline-danger" title="Delete Task">
+            <i class="bi bi-trash3"></i>
+          </a>
+        </td>
+      </tr>
+
+      {% empty %}
+      <tr>
+        <td colspan="4" class="text-muted py-4">
+          No tasks found
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+{% endblock agent_tasks %}
+

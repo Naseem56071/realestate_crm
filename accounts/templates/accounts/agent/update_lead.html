@@ -1,0 +1,68 @@
+{% extends 'accounts/agent_dashboard.html' %}
+
+{% block title %}
+<title>Agent | Update Task</title>
+{% endblock title %}
+
+{% block agent_tasks %}
+
+<div class="container assign_task  mt-4">
+    <h3 class="update_title">Update Task</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Task Title -->
+        <div class="mb-3">
+            <label class="form-label form_label">Task Title</label>
+            <input type="text"
+                   name="title"
+                   value="{{ tasks.title }}"
+                   class="form-control"
+                   required>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+            <label class="form-label form_label">Description</label>
+            <textarea name="description"
+                      class="form-control"
+                      rows="3">{{ tasks.description }}</textarea>
+        </div>
+
+        <!-- Start Date & Time -->
+        <div class="mb-3">
+            <label class="form-label form_label">Update Date & Time</label>
+            <input type="datetime-local"
+                   name="start_time"
+                   value="{{ tasks.start_time|date:'Y-m-d\\TH:i' }}"
+                   class="form-control">
+        </div>
+
+        <!-- Associate -->
+        <div class="mb-3">
+            <label class="form-label form_label">Assign to Associate</label>
+            <select name="associate" class="form-select" required>
+                {% for associate in associates %}
+                    <option value="{{ associate.id }}"
+                        {% if associate.id == tasks.associate_id %}selected{% endif %}>
+                        {{ associate.email }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="submit_reset">
+            <button type="submit" class="btn btn-primary">
+                Update Task
+            </button>
+
+            <button type="reset" class="btn btn-secondary ms-2">
+                Reset
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock agent_tasks %}

@@ -1,0 +1,98 @@
+ body {
+   overflow-x: hidden;
+ }
+
+ /* Sidebar */
+ .sidebar {
+   background: #212529;
+   min-height: 100vh;
+   color: white;
+   padding: 10px;
+ }
+
+ .sidebar .nav-link {
+   color: #adb5bd;
+ }
+
+ .sidebar .nav-link:hover,
+ .sidebar .nav-link.active {
+   color: white;
+   background: #343a40;
+   border-radius: 5px;
+ }
+
+ /* Mobile sidebar */
+ @media (max-width: 991px) {
+   .sidebar {
+     position: fixed;
+     left: -100%;
+     top: 0;
+     width: 250px;
+     z-index: 1050;
+     transition: 0.3s;
+   }
+
+   .sidebar.show {
+     left: 0;
+   }
+ }
+
+ .sidebar-header {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding: 10px;
+   background: #343a40;
+ }
+
+ .form-control:focus {
+   border-color: inherit !important;
+   box-shadow: none !important;
+ }
+
+ /* .table-card{
+  border: 1px solid black !important;
+} */
+ .submit_reset {
+   margin: 10px 0px;
+ }
+
+ .assign_task {
+   border: 2px solid rgb(211, 211, 211);
+ }
+
+ .update_title {
+   width: 200px;
+   color: #3a62e5 !important;
+   /* background: grey; */
+   padding: 15px 0px;
+   border-bottom: 1px solid black;
+ }
+
+ .form_label {
+   font-size: 17px;
+   font-weight: 600;
+ }
+
+ .table td,
+ .table th {
+   vertical-align: middle;
+
+ }
+
+ .badge {
+   padding: 6px 10px;
+   font-size: 0.85rem;
+ }
+
+.bi-person-circle{
+  color: #15bcff;
+  font-size: 22px;
+}
+ @media (max-width: 768px){
+  .actions-btn{
+   display: flex;
+   justify-content: center;
+   align-items: center;
+  }
+ }
