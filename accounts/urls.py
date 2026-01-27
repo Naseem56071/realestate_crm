@@ -24,5 +24,11 @@ urlpatterns = [
     path('associatetask/dashboard/',views.associate_view_task,name="associatetask.dashboard"),
 
     path('associate/updatetask/dashboard/<int:id>/',views.associate_update_task,name="associatetask.update.dashboard"),
+
+    path('add_products/dashboard/',views.add_products,name="admin.add_products.dashboard"),
+    path('list_products/dashboard/',views.list_products,name='admin.list_products/dashboard'),
+
+    path('update_products/dashboard/<int:id>/', views.update_product,name="admin.update_products.dashboard"),
+    path('delete_product/dashboard/<int:id>/', views.delete_product,name='admin.delete_product.dashboard'),
 ]
 

@@ -41,7 +41,7 @@
 <!-- Table -->
 <div class="card table-card mt-4">
 
-    <div class="card-header">Users list</div>
+    <div class="card-header fw-bold">Status History</div>
 
     <div class="card-body">
 
@@ -76,7 +76,7 @@
                         {% endif %}
                        </td>
                         <td>{{ h.description }}</td>
-                        <td>{{ h.updated_at }}</td>
+                       <td>{{ h.updated_at|date:"d/m/Y, h:i A" }}</td>
                     </tr>
                 </tbody>
                 {% endfor %}

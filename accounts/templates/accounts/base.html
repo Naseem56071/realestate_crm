@@ -95,7 +95,8 @@
                 {% if request.user.role == 'admin' %}
                 <ul class="nav flex-column mt-3">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                        <a class="nav-link active" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i>
+                            Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" data-bs-toggle="collapse" href="#userMenu">
@@ -112,7 +113,18 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-bookmark-fill"></i> Products</a>
+                        <a class="nav-link" data-bs-toggle="collapse" href="#userMenu1"><i
+                                class="bi bi-bookmark-fill"></i>Products</a>
+                        <div class="collapse" id="userMenu1">
+                            <ul class="nav flex-column ms-3">
+                                <li><a class="nav-link" href="{% url 'admin.add_products.dashboard' %}">Add Products</a>
+                                </li>
+                                <li><a class="nav-link" href="{% url 'admin.list_products/dashboard' %}">view
+                                        Products</a></li>
+                                <li><a class="nav-link" href="#">coming soon</a></li>
+
+                            </ul>
+                        </div>
                     </li>
 
                     <li class="nav-item">

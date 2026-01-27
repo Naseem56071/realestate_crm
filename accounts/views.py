@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import AbstractUser
 from django.db.models.manager import BaseManager
-from accounts.models import User, Task, TaskHistory
+from accounts.models import User, Task, TaskHistory,Products
 from accounts.decorators import role_required
 
 
@@ -380,3 +380,63 @@ def associate_update_task(request, id):
         return redirect('associate.dashboard')
 
     return render(request, 'accounts/associate/update_task.html', {'task': task})
+@login_required
+@role_required(['admin'])
+def add_products(request):
+    if request.method == "POST":
+        product_name=request.POST.get('p_name')
+        product_price=request.POST.get('price')
+        product_description=request.POST.get('description')
+        product_img=request.FILES.get("p_image")
+        created_at=request.POST.get('create_at')
+        
+        Products.objects.create(
+            name=product_name,
+            price=product_price,
+            description=product_description,
+            created_at=created_at,
+            image=product_img
+        )
+        messages.success(request,"Product added Successfully")
+        return redirect('dashboard')
+    return render(request,'accounts/products/add_products.html')
+@login_required
+@role_required(['admin'])
+def list_products(request):
+    products=Products.objects.all()
+    return render(request,"accounts/products/view_products.html",{'products':products})
+@login_required
+@role_required(['admin'])
+def update_product(request,id):
+    product=get_object_or_404(Products,id=id)
+    if request.method == 'POST':
+        P_name=request.POST.get('p_name')
+        price=request.POST.get('price')
+        description=request.POST.get('description')
+        p_image=request.FILES.get('p_image')
+        updated_at=request.POST.get('updated_at')
+
+        product.name=P_name
+        product.price=price
+        product.description=description
+        product.created_at=updated_at
+
+        if p_image:
+            product.image=p_image
+
+        product.save()
+        messages.success(request,"Product Updated Successfully")
+        return redirect('dashboard')
+
+    return render(request,'accounts/products/update_products.html',{'product':product})
+
+@role_required(['admin'])
+def delete_product(request,id):
+    product=get_object_or_404(Products,id=id)
+    if request.method == "POST":
+        product.delete()
+        messages.success(request, "Product deleted successfully")
+        return redirect("dashboard")
+
+    return redirect('dashboard')
+    

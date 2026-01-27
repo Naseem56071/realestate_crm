@@ -1,0 +1,92 @@
+{% extends "accounts/base.html" %}
+{% block title %} <title> View products </title>{% endblock title %}
+{% block agent_tasks %}
+
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>image</th>
+                <th>name</th>
+                <th>description</th>
+                <th>price</th>
+
+                <th>actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{% if product.image %}
+                    <img src="{{ product.image.url }}" width="80" class="img-thumbnail">
+                    {% else %}
+                    No Image
+                    {% endif %}
+                </td>
+                <td>{{ product.name }}</td>
+                <td class="text-start">{{ product.description }}</td>
+                <td>{{ product.price }}</td>
+
+                <td class="text-center">
+                    <a href="{% url 'admin.update_products.dashboard' product.id %}"
+                        class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="tooltip" title="Edit Product">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                        data-bs-target="#deleteModal{{ product.id }}">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                    <div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+                                    <h5 class="modal-title text-danger">Confirm Delete:</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+
+                                <div class="modal-body">
+                                    Are you sure you want to delete
+                                    <strong>{{ product.name }}</strong>?
+                                </div>
+
+                                <div class="modal-footer">
+                                    <!-- NO -->
+                                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                                        No
+                                    </button>
+
+                                    <!-- YES -->
+                                    <form method="POST" action="{% url 'admin.delete_product.dashboard' product.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">
+                                            Yes, Delete
+                                        </button>
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-muted py-4">
+                    No tasks found
+                </td>
+            </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+{% endblock agent_tasks%}
