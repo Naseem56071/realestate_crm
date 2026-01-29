@@ -95,76 +95,79 @@
                 {% if request.user.role == 'admin' %}
                 <ul class="nav flex-column mt-3">
                     <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i>
-                            Dashboard</a>
+                        <a class="nav-link active nav-links" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i>
+                            <span>Dashboard</span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#userMenu">
-                            <i class="bi bi-people"></i> Users
+                        <a class="nav-link nav-links" data-bs-toggle="collapse" href="#userMenu">
+                            <i class="bi bi-people"></i> <span>Users </span>
                         </a>
                         <div class="collapse" id="userMenu">
                             <ul class="nav flex-column ms-3">
-                                <li><a class="nav-link" href="{% url 'admin.dashboard' %}"> <i
-                                            class="bi bi-arrow-return-right"></i>Admin</a></li>
-                                <li><a class="nav-link" href="#"> <i class="bi bi-arrow-return-right"></i>Agents</a>
+                                <li><a class="nav-link nav-links" href="{% url 'admin.dashboard' %}"> <i
+                                            class="bi bi-arrow-return-right"></i> <span> Admin</span></a></li>
+                                <li><a class="nav-link nav-links" href="#"> <i class="bi bi-arrow-return-right"></i>
+                                        <span>Agents</span> </a>
                                 </li>
-                                <li><a class="nav-link" href="{% url 'associate.index.tracking.dashboard' %}"><i
-                                            class="bi bi-arrow-return-right"></i>Associates lead history</a></li>
+                                <li><a class="nav-link nav-links" href="{% url 'associate.index.tracking.dashboard' %}"><i
+                                            class="bi bi-arrow-return-right"></i> <span>Associates lead history</span>
+                                    </a></li>
 
                             </ul>
                         </div>
                     </li>
 
-                    <li class="nav-item">
+                    <li class="nav-item nav-links">
                         <a class="nav-link" data-bs-toggle="collapse" href="#userMenu1"><i
-                                class="bi bi-bookmark-fill"></i>Products</a>
+                                class="bi bi-bookmark-fill"></i> <span>Products</span> </a>
                         <div class="collapse" id="userMenu1">
                             <ul class="nav flex-column ms-3">
-                                <li><a class="nav-link" href="{% url 'admin.add_products.dashboard' %}"><i
-                                            class="bi bi-arrow-return-right"></i>Add Products</a>
+                                <li><a class="nav-link nav-links" href="{% url 'admin.add_products.dashboard' %}"><i
+                                            class="bi bi-arrow-return-right"></i> <span>Add Products</span> </a>
                                 </li>
-                                <li><a class="nav-link" href="{% url 'admin.list_products/dashboard' %}"> <i
-                                            class="bi bi-arrow-return-right"></i>view
+                                <li><a class="nav-link nav-links" href="{% url 'admin.list_products/dashboard' %}"> <i
+                                            class="bi bi-arrow-return-right"></i> <span>view</span>
                                         Products</a></li>
-                                <li><a class="nav-link" href="#">coming soon</a></li>
+                                <li><a class="nav-link" href="#"> coming soon</a></li>
 
                             </ul>
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'admin.lead_details.dashboard' %}"><i
+                        <a class="nav-link nav-links" href="{% url 'admin.lead_details.dashboard' %}"><i
                                 class="bi bi-list-task"></i>
-                            leads</a>
+                            <span>leads</span></a>
                     </li>
 
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link" href="#"><i class="bi bi-ui-checks"></i> Forms</a>
-                    </li>
+                    </li> -->
 
                     {% elif request.user.role == 'agent' %}
                     <ul class="nav flex-column mt-3">
                         <li class="nav-item">
-                            <a class="nav-link active" href="{% url 'agent.dashboard' %}"><i
-                                    class="bi bi-speedometer2"></i> Dashboard</a>
+                            <a class="nav-link active nav-links" href="{% url 'agent.dashboard' %}"><i
+                                    class="bi bi-speedometer2"></i> <span>Dashboard</span> </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'agent.view.dashboard' %}"><i
-                                    class="bi bi-speedometer2"></i>Agent Dashboard</a>
+                            <a class="nav-link nav-links" href="{% url 'agent.view.dashboard' %}"><i
+                                    class="bi bi-speedometer2"></i> <span>Agent Dashboard</span> </a>
                         </li>
-                        <li><a class="nav-link" href="{% url 'associate.index.tracking.dashboard' %}">
-                                <i class="bi bi-arrow-return-right"></i>Associates lead history</a></li>
+                        <li><a class="nav-link nav-links" href="{% url 'associate.index.tracking.dashboard' %}">
+                                <i class="bi bi-arrow-return-right"></i> <span> Associates lead history </span></a></li>
                         <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#userMenu">
-                                <i class="bi bi-list-task"></i> leads
+                            <a class="nav-link nav-links" data-bs-toggle="collapse" href="#userMenu">
+                                <i class="bi bi-list-task"></i><span> leads</span>
                             </a>
                             <div class="collapse" id="userMenu">
                                 <ul class="nav flex-column ms-3">
-                                    <li><a class="nav-link" href="{% url 'agent.view_task.dashboard' %}"> <i
-                                                class="bi bi-arrow-return-right"></i>view lead</a>
+                                    <li><a class="nav-link nav-links" href="{% url 'agent.view_task.dashboard' %}"> <i
+                                                class="bi bi-arrow-return-right"></i> <span>view lead</span> </a>
                                     </li>
 
-                                    <li><a class="nav-link" href="#"> <i class="bi bi-arrow-return-right"></i>coming
-                                            soon</a></li>
+                                    <li><a class="nav-link nav-links" href="#"> <i class="bi bi-arrow-return-right"></i>
+                                            <span>coming
+                                                soon</span></a></li>
                                 </ul>
                             </div>
                         </li>
@@ -173,23 +176,23 @@
                         {% elif request.user.role == 'associate' %}
                         <ul class="nav flex-column mt-3">
                             <li class="nav-item">
-                                <a class="nav-link active" href="{% url 'associate.dashboard' %}"><i
-                                        class="bi bi-speedometer2"></i> Dashboard</a>
-                            </li>
-                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'associate.index.tracking.dashboard' %}"><i
-                                        class="bi bi-speedometer2"></i> associates dashboard</a>
+                                <a class="nav-link active nav-links" href="{% url 'associate.dashboard' %}"><i
+                                        class="bi bi-speedometer2"></i> <span>Dashboard</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" data-bs-toggle="collapse" href="#userMenu">
-                                    <i class="bi bi-list-task"></i> tasks
+                                <a class="nav-link nav-links" href="{% url 'associate.index.tracking.dashboard' %}"><i
+                                        class="bi bi-speedometer2"></i> <span>associates dashboard</span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-links" data-bs-toggle="collapse" href="#userMenu">
+                                    <i class="bi bi-list-task"></i> <span>tasks</span>
                                 </a>
                                 <div class="collapse" id="userMenu">
                                     <ul class="nav flex-column ms-3">
-                                        <li><a class="nav-link" href="{% url 'associatetask.dashboard' %}">view task
+                                        <li><a class="nav-link" href="{% url 'associatetask.dashboard' %}"> view task
                                             </a></li>
 
-                                        <li><a class="nav-link" href="#">coming soon</a></li>
+                                        <li><a class="nav-link" href="#"> coming soon</a></li>
                                     </ul>
                                 </div>
                             </li>

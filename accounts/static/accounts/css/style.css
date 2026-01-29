@@ -20,7 +20,13 @@
    background: #343a40;
    border-radius: 5px;
  }
-
+.nav-links{
+  display: flex;
+  justify-content: flex-start;
+}
+.nav-links i{
+  margin-right: 10px;
+}
  /* Mobile sidebar */
  @media (max-width: 991px) {
    .sidebar {
