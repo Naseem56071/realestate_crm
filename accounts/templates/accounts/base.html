@@ -104,9 +104,12 @@
                         </a>
                         <div class="collapse" id="userMenu">
                             <ul class="nav flex-column ms-3">
-                                <li><a class="nav-link" href="{% url 'dashboard' %}">Admin</a></li>
-                                <li><a class="nav-link" href="#">Agents</a></li>
-                                <li><a class="nav-link" href="#">Associates</a></li>
+                                <li><a class="nav-link" href="{% url 'admin.dashboard' %}"> <i
+                                            class="bi bi-arrow-return-right"></i>Admin</a></li>
+                                <li><a class="nav-link" href="#"> <i class="bi bi-arrow-return-right"></i>Agents</a>
+                                </li>
+                                <li><a class="nav-link" href="{% url 'associate.index.tracking.dashboard' %}"><i
+                                            class="bi bi-arrow-return-right"></i>Associates lead history</a></li>
 
                             </ul>
                         </div>
@@ -117,14 +120,21 @@
                                 class="bi bi-bookmark-fill"></i>Products</a>
                         <div class="collapse" id="userMenu1">
                             <ul class="nav flex-column ms-3">
-                                <li><a class="nav-link" href="{% url 'admin.add_products.dashboard' %}">Add Products</a>
+                                <li><a class="nav-link" href="{% url 'admin.add_products.dashboard' %}"><i
+                                            class="bi bi-arrow-return-right"></i>Add Products</a>
                                 </li>
-                                <li><a class="nav-link" href="{% url 'admin.list_products/dashboard' %}">view
+                                <li><a class="nav-link" href="{% url 'admin.list_products/dashboard' %}"> <i
+                                            class="bi bi-arrow-return-right"></i>view
                                         Products</a></li>
                                 <li><a class="nav-link" href="#">coming soon</a></li>
 
                             </ul>
                         </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin.lead_details.dashboard' %}"><i
+                                class="bi bi-list-task"></i>
+                            leads</a>
                     </li>
 
                     <li class="nav-item">
@@ -138,16 +148,23 @@
                                     class="bi bi-speedometer2"></i> Dashboard</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="{% url 'agent.view.dashboard' %}"><i
+                                    class="bi bi-speedometer2"></i>Agent Dashboard</a>
+                        </li>
+                        <li><a class="nav-link" href="{% url 'associate.index.tracking.dashboard' %}">
+                                <i class="bi bi-arrow-return-right"></i>Associates lead history</a></li>
+                        <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="collapse" href="#userMenu">
                                 <i class="bi bi-list-task"></i> leads
                             </a>
                             <div class="collapse" id="userMenu">
                                 <ul class="nav flex-column ms-3">
-                                    <li><a class="nav-link" href="{% url 'agent.view_task.dashboard' %}">view lead</a>
+                                    <li><a class="nav-link" href="{% url 'agent.view_task.dashboard' %}"> <i
+                                                class="bi bi-arrow-return-right"></i>view lead</a>
                                     </li>
-                                    <li><a class="nav-link" href="{% url 'agent.assign_lead.dashboard' %}">assign
-                                            lead</a></li>
-                                    <li><a class="nav-link" href="#">coming soon</a></li>
+
+                                    <li><a class="nav-link" href="#"> <i class="bi bi-arrow-return-right"></i>coming
+                                            soon</a></li>
                                 </ul>
                             </div>
                         </li>
@@ -158,6 +175,10 @@
                             <li class="nav-item">
                                 <a class="nav-link active" href="{% url 'associate.dashboard' %}"><i
                                         class="bi bi-speedometer2"></i> Dashboard</a>
+                            </li>
+                             <li class="nav-item">
+                                <a class="nav-link" href="{% url 'associate.index.tracking.dashboard' %}"><i
+                                        class="bi bi-speedometer2"></i> associates dashboard</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-toggle="collapse" href="#userMenu">
@@ -196,7 +217,12 @@
                 <div class="messages mt-2">
                     {% if messages %}
                     {% for message in messages %}
-                    {% if message.tags == 'success' %}
+                    {% if message.tags == 'error' %}
+                    <div class="alert alert-danger alert-dismissible fade show auto-dismiss" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% elif message.tags == 'success' %}
                     <div class="alert alert-success alert-dismissible fade show auto-dismiss" role="alert">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -205,202 +231,18 @@
                     {% endfor %}
                     {% endif %}
                 </div>
+
                 <h3>Dashboard</h3>
+
+                {% block welcome %}
+
+                {% endblock welcome %}
 
                 <!-- Cards -->
                 {% block agent_tasks %}
 
                 {% endblock agent_tasks %}
 
-                {% if request.user.role == 'admin' %}
-                <div class="card table-card mt-4">
-
-
-                    <div class="card-header bg-primary text-white">
-                        Create Agent
-                    </div>
-
-                    <div class="card-body">
-                        <form method="POST" action="{% url 'create.agent.account' %}">
-
-                            {% if messages %}
-                            {% for message in messages %}
-                            {% if message.tags == 'error' %}
-                            <div class="alert alert-danger alert-dismissible fade show auto-dismiss" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                    aria-label="Close"></button>
-                            </div>
-                            {% endif %}
-                            {% endfor %}
-                            {% endif %}
-                            <!-- Django CSRF -->
-                            {% csrf_token %}
-
-                            <div class="row">
-
-                                <!-- Full Name -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Full Name</label>
-                                    <input type="text" name="name" class="form-control" placeholder="Enter full name"
-                                        required>
-                                </div>
-
-                                <!-- Email -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Email</label>
-                                    <input type="email" name="email" class="form-control" placeholder="Enter email"
-                                        required>
-                                </div>
-
-                                <!-- Phone -->
-                                <!-- <div class="col-md-6 mb-3">
-                                    <label class="form-label">Phone Number</label>
-                                    <input type="tel" class="form-control" placeholder="Enter phone number">
-                                </div> -->
-
-                                <!-- Role -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Role</label>
-                                    <select class="form-select" name="role" required>
-                                        <option value="">Select Role</option>
-                                        <option value="agent">agent</option>
-                                    </select>
-                                </div>
-
-                                <!-- Password -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Password</label>
-                                    <input type="password" name="password" class="form-control"
-                                        placeholder="Create password" required>
-                                </div>
-
-                                <!-- Confirm Password -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Confirm Password</label>
-                                    <input type="password" name="confirm-password" class="form-control"
-                                        placeholder="Confirm password" required>
-                                </div>
-
-                                <!-- Status -->
-                                <!-- <div class="col-md-6 mb-3">
-                                    <label class="form-label">Status</label>
-                                    <select class="form-select">
-                                        <option value="active">Active</option>
-                                        <option value="inactive">Inactive</option>
-                                    </select>
-                                </div> -->
-
-                            </div>
-
-                            <!-- Buttons -->
-                            <div class="d-flex justify-content-end">
-                                <button type="submit" class="btn btn-success me-2">Create User</button>
-                                <button type="reset" class="btn btn-secondary ">Reset</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                {% elif request.user.role == 'agent' %}
-
-                <div class="card table-card mt-4">
-
-
-                    <div class="card-header bg-primary text-white">
-                        Create Associate
-                    </div>
-
-                    <div class="card-body">
-                        <form method="POST" action="{% url 'create.associate.account' %}">
-                            {% block messages %}
-
-                            {% if messages %}
-                            {% for message in messages %}
-                            {% if message.tags == 'error' %}
-                            <div class="alert alert-danger alert-dismissible fade show auto-dismiss" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                    aria-label="Close"></button>
-                            </div>
-                            {% elif message.tags == 'success' %}
-                            <div class="alert alert-success alert-dismissible fade show auto-dismiss" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                    aria-label="Close"></button>
-                            </div>
-                            {% endif %}
-                            {% endfor %}
-                            {% endif %}
-                            {% endblock messages %}
-                            <!-- Django CSRF -->
-                            {% csrf_token %}
-
-                            <div class="row">
-
-                                <!-- Full Name -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Full Name</label>
-                                    <input type="text" name="name" class="form-control" placeholder="Enter full name"
-                                        required>
-                                </div>
-
-                                <!-- Email -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Email</label>
-                                    <input type="email" name="email" class="form-control" placeholder="Enter email"
-                                        required>
-                                </div>
-
-                                <!-- Phone -->
-                                <!-- <div class="col-md-6 mb-3">
-                                    <label class="form-label">Phone Number</label>
-                                    <input type="tel" class="form-control" placeholder="Enter phone number">
-                                </div> -->
-
-                                <!-- Role -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Role</label>
-                                    <select class="form-select form-control" name="role" required>
-                                        <option value="">Select Role</option>
-                                        <option value="associate">associate</option>
-
-                                    </select>
-                                </div>
-
-                                <!-- Password -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Password</label>
-                                    <input type="password" name="password" class="form-control"
-                                        placeholder="Create password" required>
-                                </div>
-
-                                <!-- Confirm Password -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Confirm Password</label>
-                                    <input type="password" name="confirm-password" class="form-control"
-                                        placeholder="Confirm password" required>
-                                </div>
-
-                                <!-- Status -->
-                                <!-- <div class="col-md-6 mb-3">
-                                    <label class="form-label">Status</label>
-                                    <select class="form-select">
-                                        <option value="active">Active</option>
-                                        <option value="inactive">Inactive</option>
-                                    </select>
-                                </div> -->
-
-                            </div>
-
-                            <!-- Buttons -->
-                            <div class="d-flex justify-content-end">
-                                <button type="reset" class="btn btn-secondary me-2">Reset</button>
-                                <button type="submit" class="btn btn-success">Create User</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                {% endif %}
 
             </div>
         </div>

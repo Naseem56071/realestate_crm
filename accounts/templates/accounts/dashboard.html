@@ -1,95 +1,10 @@
 {% extends 'accounts/base.html' %}
 
 {% block title %} <title> realestate admin dashboard </title>{% endblock title %}
+{% block welcome %}
+<span class="auto-dismiss"
+    style="font-size: 20px;color:rgb(2, 2, 2);background-color: rgb(188, 188, 188);display: flex;justify-content: center;align-items: center; margin-bottom: 20px;">welcome,
+    {{request.user.name }}
+</span>
 
-{% block agent_tasks %}
-
-{% if request.user.role == 'admin' %}
-
-<div class="row mt-4">
-
-    <div class="col-md-4 mt-3">
-
-        <div class="card text-bg-primary">
-            <div class="card-body">
-                <h5>Total Users</h5>
-                <h2>{{ total_users }}</h2>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4 mt-3">
-        <div class="card text-bg-success">
-            <div class="card-body">
-                <h5>Total Agents</h5>
-                <h2>{{ total_agents }}</h2>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4 mt-3">
-        <div class="card text-bg-warning">
-            <div class="card-body">
-                <h5>Total Associates</h5>
-                <h2>{{ total_associates }}</h2>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<!-- Table -->
-<div class="card table-card mt-4">
-
-    <div class="card-header fw-bold">Status History</div>
-
-    <div class="card-body">
-
-        <!--  RESPONSIVE WRAPPER -->
-        <div class="table-responsive">
-
-            <table class="table table-striped table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Updated By</th>
-                        <th>Status</th>
-                        <th>description</th>
-                        <th>Updated At</th>
-                    </tr>
-                </thead>
-
-                {% for h in histories %}
-                <tbody>
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ h.updated_by.email }}</td>
-                        <td>
-                        {% if h.task.status == 'pending' %}
-                        <span class="badge bg-warning text-dark">Pending</span>
-                        {% elif h.task.status == 'in_progress' %}
-                        <span class="badge bg-info text-dark">In Progress</span>
-                        {% elif h.task.status == 'completed' %}
-                        <span class="badge bg-success">Completed</span>
-                        {% else %}
-                        <span class="badge bg-secondary">{{ h.task.status }}</span>
-                        {% endif %}
-                       </td>
-                        <td>{{ h.description }}</td>
-                       <td>{{ h.updated_at|date:"d/m/Y, h:i A" }}</td>
-                    </tr>
-                </tbody>
-                {% endfor %}
-                </tbody>
-
-            </table>
-
-        </div>
-        <!--  END RESPONSIVE -->
-
-    </div>
-</div>
-
-{% endif %}
-
-{% endblock agent_tasks %}
+{% endblock welcome %}

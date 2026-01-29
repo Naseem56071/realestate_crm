@@ -1,0 +1,182 @@
+{% extends 'accounts/base.html' %}
+{% block title %} <title>Admin dashboard</title>{% endblock title %}
+{% block agent_tasks %}
+
+{% if request.user.role == 'admin' %}
+
+<div class="row mt-4">
+
+    <div class="col-md-4 mt-3">
+
+        <div class="card text-bg-primary">
+            <div class="card-body">
+                <h5>Total Users</h5>
+                <h2>{{ total_users }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mt-3">
+        <div class="card text-bg-success">
+            <div class="card-body">
+                <h5>Total Agents</h5>
+                <h2>{{ total_agents }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mt-3">
+        <div class="card text-bg-warning">
+            <div class="card-body">
+                <h5>Total Associates</h5>
+                <h2>{{ total_associates }}</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="card table-card mt-4">
+
+
+    <div class="card-header bg-primary text-white">
+        Create Agent
+    </div>
+
+    <div class="card-body">
+        <form method="POST" action="{% url 'create.agent.account' %}">
+
+            {% if messages %}
+            {% for message in messages %}
+            {% if message.tags == 'error' %}
+            <div class="alert alert-danger alert-dismissible fade show auto-dismiss" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+            <!-- Django CSRF -->
+            {% csrf_token %}
+
+            <div class="row">
+
+                <!-- Full Name -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="Enter email" required>
+                </div>
+
+                <!-- Phone -->
+                <!-- <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" placeholder="Enter phone number">
+                                </div> -->
+
+                <!-- Role -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Role</label>
+                    <select class="form-select" name="role" required>
+                        <option value="">Select Role</option>
+                        <option value="agent">agent</option>
+                    </select>
+                </div>
+
+                <!-- Password -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="Create password" required>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" name="confirm-password" class="form-control" placeholder="Confirm password"
+                        required>
+                </div>
+
+                <!-- Status -->
+                <!-- <div class="col-md-6 mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div> -->
+
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-success me-2">Create User</button>
+                <button type="reset" class="btn btn-secondary ">Reset</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- all agents and associate table-->
+<div class="container mt-5">
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-hover">
+            <h3 class="mb-4">All Agents & Associates Details:</h3>
+            <thead class="table-dark">
+                <tr>
+
+                    <th>User Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                {% if user.role == 'agent' or user.role == 'associate' %}
+
+                <tr>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.role }}</td>
+                   
+                    <td>
+                        {% if user.is_active %}
+                        <span class="text-dark bg-info-subtle p-1 rounded">Active</span>
+
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="actions-btn ">
+                        <a href="#" class="btn btn-sm btn-outline-primary me-1" title="Edit Task">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+
+                        <a href="{% url 'admin.delete.agent.associate.dashboard' user.id %}" class="btn btn-sm btn-outline-danger" title="Delete Task">
+                            <i class="bi bi-trash3"></i>
+                        </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- end-->
+
+
+
+
+{% endif %}
+
+{% endblock agent_tasks %}

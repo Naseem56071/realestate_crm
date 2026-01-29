@@ -45,9 +45,11 @@
    background: #343a40;
  }
 
- .form-control:focus {
+ .form-control:focus,
+ .form-select:focus {
    border-color: inherit !important;
    box-shadow: none !important;
+   border-radius: 0px !important;
  }
 
  /* .table-card{
@@ -77,22 +79,25 @@
  .table td,
  .table th {
    vertical-align: middle;
-
  }
+ 
 
  .badge {
    padding: 6px 10px;
    font-size: 0.85rem;
  }
 
-.bi-person-circle{
-  color: #15bcff;
-  font-size: 22px;
-}
- @media (max-width: 768px){
-  .actions-btn{
-   display: flex;
-   justify-content: center;
-   align-items: center;
-  }
+ .bi-person-circle {
+   color: #15bcff;
+   font-size: 22px;
+ }
+
+
+
+ @media (max-width: 768px) {
+   .actions-btn {
+     display: flex !important;
+     justify-content: space-between !important;
+     align-items: center !important;
+   }
  }

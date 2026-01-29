@@ -3,6 +3,8 @@
 {% block title %}
 <title>associate taks</title>
 {% endblock title %}
+{% block welcome %}
+{% endblock welcome %}
 
 {% block agent_tasks %}
 <div class="table-responsive">
@@ -10,10 +12,12 @@
     <thead class="table-dark">
       <tr>
         <th>#</th>
-        <th>Title</th>
-        <th>description</th>
-        <th>assgined date & time</th>
-        <th>Associate</th>
+        <th>Customer Name</th>
+        <th>Customer Email</th>
+        <th>Phone Number</th>
+        <th>customer Message</th>
+        <th>assgined at</th>
+        <th>Updated at</th>
         <th>Status</th>
         <th>Actions</th>
       </tr>
@@ -23,10 +27,12 @@
       {% for task in tasks %}
       <tr>
         <td>{{ forloop.counter }}</td>
-        <td class="text-start">{{ task.title }}</td>
+        <td class="text-start">{{ task.name }}</td>
+        <td>{{ task.email }}</td>
+        <td>{{ task.phone }}</td>
         <td>{{ task.description }}</td>
-        <td>{{ task.created_at }}</td>
-        <td>{{ task.associate.email }}</td>
+        <td>{{ task.assigned_at }}</td>
+        <td>{{ task.updated_at }}</td>
         <td>
           {% if task.status == 'pending' %}
           <span class="badge bg-warning text-dark">Pending</span>
@@ -39,19 +45,15 @@
           {% endif %}
         </td>
 
-        <td class="text-center">
-          <a href="{% url 'associatetask.update.dashboard' task.id %}" class="btn btn-sm btn-outline-primary me-1" title="Edit Task">
-           <i class="bi bi-pencil-square"></i>
-          </a>
-
-          <a href="#" class="btn btn-sm btn-outline-danger" title="Delete Task">
-            <i class="bi bi-trash3"></i>
+        <td class="text-center ">
+          <a href="{% url 'associatetask.update.dashboard' task.id %}" class="btn btn-sm btn-outline-primary " title="update Task">
+          update task
           </a>
         </td>
       </tr>
       {% empty %}
       <tr>
-        <td colspan="4" class="text-muted py-4">
+        <td colspan="8"lass="text-muted py-4">
           No tasks found
         </td>
       </tr>
