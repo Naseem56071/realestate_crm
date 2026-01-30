@@ -117,15 +117,15 @@
                         </div>
                     </li>
 
-                    <li class="nav-item nav-links">
+                    <li class="nav-item">
                         <a class="nav-link" data-bs-toggle="collapse" href="#userMenu1"><i
                                 class="bi bi-bookmark-fill"></i> <span>Products</span> </a>
                         <div class="collapse" id="userMenu1">
                             <ul class="nav flex-column ms-3">
-                                <li><a class="nav-link nav-links" href="{% url 'admin.add_products.dashboard' %}"><i
+                                <li><a class="nav-link" href="{% url 'admin.add_products.dashboard' %}"><i
                                             class="bi bi-arrow-return-right"></i> <span>Add Products</span> </a>
                                 </li>
-                                <li><a class="nav-link nav-links" href="{% url 'admin.list_products/dashboard' %}"> <i
+                                <li><a class="nav-link" href="{% url 'admin.list_products/dashboard' %}"> <i
                                             class="bi bi-arrow-return-right"></i> <span>view</span>
                                         Products</a></li>
                                 <li><a class="nav-link" href="#"> coming soon</a></li>
@@ -139,9 +139,9 @@
                             <span>leads</span></a>
                     </li>
 
-                    <!-- <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-ui-checks"></i> Forms</a>
-                    </li> -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'assign_permissions' %}"><i class="bi bi-gear"></i> Permissions</a>
+                    </li>
 
                     {% elif request.user.role == 'agent' %}
                     <ul class="nav flex-column mt-3">

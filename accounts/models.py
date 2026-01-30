@@ -62,26 +62,27 @@ class Task(models.Model):
     ]
     name = models.CharField(max_length=100)
     email = models.EmailField(blank=True, default="")
-    phone = models.CharField(max_length=20,default="")
+    phone = models.CharField(max_length=20, default="")
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
 
     agent = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="agent_tasks", null=True,
-    blank=True
+        blank=True
     )
 
     associate = models.ForeignKey(
-    User,
-    on_delete=models.CASCADE,
-    related_name="associate_tasks",
-    null=True,   # allow NULL in database
-    blank=True   # allow empty in forms
+        User,
+        on_delete=models.CASCADE,
+        related_name="associate_tasks",
+        null=True,   # allow NULL in database
+        blank=True   # allow empty in forms
     )
     status = models.CharField(
-     max_length=20, choices=STATUS_CHOICES, default="new")
-    
-    property_type = models.CharField(max_length=20,choices=PROPERTY_TYPE_CHOICES,blank=True, default="")
+        max_length=20, choices=STATUS_CHOICES, default="new")
+
+    property_type = models.CharField(
+        max_length=20, choices=PROPERTY_TYPE_CHOICES, blank=True, default="")
 
     preferred_location = models.CharField(
         max_length=100,
@@ -96,16 +97,16 @@ class Task(models.Model):
         max_digits=12,
         decimal_places=2,
         null=True,
-        blank=True,default=None
+        blank=True, default=None
     )
-   
+
     # ======================
     # CALL FEEDBACK
     # ======================
     interest_level = models.CharField(
         max_length=10,
         choices=INTEREST_LEVEL_CHOICES,
-        blank=True,default=""
+        blank=True, default=""
     )
 
     next_action = models.CharField(
@@ -115,13 +116,12 @@ class Task(models.Model):
 
     client_response = models.TextField(blank=True,   default="")
     objections = models.TextField(blank=True,  default="")
-    
-    
+
     # AGENT MANUAL RESPONSE (FREE TEXT)
-    
+
     agent_note = models.TextField(
         blank=True,
-         default="",
+        default="",
         help_text="Agent call response / remarks"
     )
 
@@ -137,13 +137,22 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     assigned_at = models.DateTimeField(auto_now=True,
-    null=True,
-    blank=True)
+                                       null=True,
+                                       blank=True)
 
     updated_at = models.DateTimeField(
-    auto_now=True)
+        auto_now=True)
+
     def __str__(self):
         return self.title
+
+    class Meta:
+        permissions = [
+            ("can_assign_task", "Can assign task"),
+            ("can_update_task", "Can update task"),
+            ("can_view_all_tasks", "Can view all tasks"),
+            ("can_delete_task","Can delete tasks"),
+        ]
 
 
 class TaskHistory(models.Model):
@@ -161,8 +170,8 @@ class TaskHistory(models.Model):
 
     # snapshot of important fields
     status = models.CharField(
-        max_length=20,choices=Task.STATUS_CHOICES,
-        default="new"   #  IMPORTANT
+        max_length=20, choices=Task.STATUS_CHOICES,
+        default="new"  # IMPORTANT
     )
 
     interest_level = models.CharField(
@@ -192,7 +201,6 @@ class TaskHistory(models.Model):
 
     def __str__(self):
         return f"{self.task.title} - {self.updated_at}"
-
 
 
 class Properties(models.Model):

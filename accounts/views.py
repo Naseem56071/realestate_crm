@@ -7,7 +7,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib import messages
 from django.http.response import HttpResponse, HttpResponseRedirect
-from accounts.models import User, Task, TaskHistory,Properties
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from accounts.models import User, Task, TaskHistory, Properties
 from accounts.decorators import role_required
 
 
@@ -27,7 +29,8 @@ def login_view(request):
         password = request.POST.get("password")
         try:
             user_obj = User.objects.get(email=email)
-            print(f"User found: {user_obj.email}, Role: {user_obj.role}, Active: {user_obj.is_active}")
+            print(
+                f"User found: {user_obj.email}, Role: {user_obj.role}, Active: {user_obj.is_active}")
         except User.DoesNotExist:
             print("No user with this email")
             messages.error(request, "Invalid email or password")
@@ -36,7 +39,8 @@ def login_view(request):
         user = authenticate(request, email=email, password=password)
         if user is not None and user.is_active:
             auth_login(request, user)
-            messages.success(request, f"{request.user.name}, Logged in successfully!")
+            messages.success(
+                request, f"{request.user.name}, Logged in successfully!")
 
             # Redirect based on role
             if user.role == "admin":
@@ -52,12 +56,70 @@ def login_view(request):
 
     return render(request, "accounts/login.html")
 
+
+@login_required
+def assign_permissions(request):
+    if request.user.role != "admin":
+        return HttpResponseRedirect("you dont have permissin to access the permissions")
+
+    users = User.objects.filter(role__in=["agent", "associate"])
+    selected_user = None
+    user_permissions = []
+
+    content_type = ContentType.objects.get_for_model(Task)
+
+    # Get user_id from GET when user selects a user
+    user_id = request.GET.get("user_id")
+    if user_id:
+        selected_user = get_object_or_404(User, id=user_id)
+        # Load assigned permissions for this user
+        user_permissions = selected_user.user_permissions.filter(
+            content_type=content_type
+        ).values_list("codename", flat=True)
+
+    if request.method == "POST":
+        user_id = request.POST.get("user_id")
+        permission_codes = request.POST.getlist("permissions")
+        selected_user = get_object_or_404(User, id=user_id)
+
+        # Remove old task permissions
+        old_perms = selected_user.user_permissions.filter(
+            content_type=content_type
+        )
+
+        for perm in old_perms:
+            selected_user.user_permissions.remove(perm)
+
+        # Add new permissions
+        for code in permission_codes:
+            permission = Permission.objects.get(
+                codename=code,
+                content_type=content_type
+            )
+            selected_user.user_permissions.add(permission)
+
+        # Reload user_permissions for rendering
+        user_permissions = selected_user.user_permissions.filter(
+            content_type=content_type
+        ).values_list("codename", flat=True)
+        messages.success(request, "added permissions")
+        return redirect("assign_permissions")
+
+    return render(request, "accounts/admin/assign_permissions.html", {
+        "users": users,
+        "selected_user": selected_user,
+        "user_permissions": user_permissions,
+    })
+
+
 @login_required
 def logout_view(request):
     username = request.user.name
     auth_logout(request)
-    messages.success(request, f"{username}, You have been logged out successfully.")
+    messages.success(
+        request, f"{username}, You have been logged out successfully.")
     return redirect("login")
+
 
 def contact_us(request):
     if request.method == "POST":
@@ -66,10 +128,11 @@ def contact_us(request):
         phone = request.POST.get("phone")
         message = request.POST.get("message")
         if not re.fullmatch(r"\d{10}", phone):
-            messages.error(request, "Phone number must contain exactly 10 digits.")
+            messages.error(
+                request, "Phone number must contain exactly 10 digits.")
             return redirect(request.path)
         # Example: save to DB or send email
-        agent = (User.objects.filter(role="agent").annotate(task_count=Count("agent_tasks")).order_by("task_count","id").first()
+        agent = (User.objects.filter(role="agent").annotate(task_count=Count("agent_tasks")).order_by("task_count", "id").first()
                  )
         Task.objects.create(
             name=name,
@@ -82,7 +145,8 @@ def contact_us(request):
 
         messages.success(request, "Your message has been sent successfully!")
         return redirect("contact")
-    return render(request,'accounts/contact.html')
+    return render(request, 'accounts/contact.html')
+
 
 @login_required
 def dashboard(request):
@@ -93,53 +157,56 @@ def dashboard(request):
     return render(
         request,
         "accounts/dashboard.html",
-        
+
     )
+
 
 @login_required
 @role_required(['admin'])
 def admin_dashboard_view(request):
     tasks = Task.objects.all().select_related('agent', 'associate')
-    histories = TaskHistory.objects.filter(task__in=tasks).order_by('task', 'updated_at')
-    users=User.objects.all()
+    histories = TaskHistory.objects.filter(
+        task__in=tasks).order_by('task', 'updated_at')
+    users = User.objects.all()
     total_users = User.objects.count()
     total_agents = User.objects.filter(role="agent").count()
     total_associates = User.objects.filter(role='associate').count()
-    return render(request,'accounts/admin/admin_dashboard.html',{
-            'users':users,
-            "tasks": tasks,
-            "histories": histories,
-            "total_users": total_users,
-            "total_agents": total_agents,
-            "total_associates": total_associates,
-        })
+    return render(request, 'accounts/admin/admin_dashboard.html', {
+        'users': users,
+        "tasks": tasks,
+        "histories": histories,
+        "total_users": total_users,
+        "total_agents": total_agents,
+        "total_associates": total_associates,
+    })
+
 
 @role_required(["admin"])
-def admin_deletes_agents_associates(request,id):
-    delete_users=User.objects.get(id=id)
+def admin_deletes_agents_associates(request, id):
+    delete_users = User.objects.get(id=id)
     delete_users.delete()
-    messages.success(request,f'{delete_users.name},deleted successfully')
+    messages.success(request, f'{delete_users.name},deleted successfully')
     return redirect("admin.dashboard")
+
 
 @login_required
 @role_required(["admin"])
 def lead_details(request):
-    leads=Task.objects.all()
-    total_leads=Task.objects.count()
-    pending_leads=Task.objects.filter(status='pending').count()
-    new_leads=Task.objects.filter(status='new').count()
-    in_progress_lead=Task.objects.filter(status='in_progress').count()
-    completed_leads=Task.objects.filter(status="completed").count()
-    return render(request,'accounts/admin/lead_details.html',{"leads":leads,"total_leads":total_leads,"pending_leads":pending_leads,"new_leads":new_leads,"completed_leads":completed_leads,"in_progress_lead":in_progress_lead})
+    leads = Task.objects.all()
+    total_leads = Task.objects.count()
+    pending_leads = Task.objects.filter(status='pending').count()
+    new_leads = Task.objects.filter(status='new').count()
+    in_progress_lead = Task.objects.filter(status='in_progress').count()
+    completed_leads = Task.objects.filter(status="completed").count()
+    return render(request, 'accounts/admin/lead_details.html', {"leads": leads, "total_leads": total_leads, "pending_leads": pending_leads, "new_leads": new_leads, "completed_leads": completed_leads, "in_progress_lead": in_progress_lead})
 
-@role_required(["admin","agent"])
-def delete_lead_admin(request,id):
-    delete_task=get_object_or_404(User,id=id)
+
+@role_required(["admin", "agent"])
+def delete_lead_admin(request, id):
+    delete_task = get_object_or_404(User, id=id)
     delete_task.delete()
-    messages.success(request,f"{delete_task.name}, lead deleted successfully")
+    messages.success(request, f"{delete_task.name}, lead deleted successfully")
     return redirect('admin.lead_details.dashboard')
-
-
 
 
 @login_required
@@ -234,21 +301,22 @@ def create_agent(request):
 def agent_dashboard(request):
     return render(request, "accounts/agent/dashboard.html")
 
+
 @login_required
 @role_required(["agent"])
 def agent_dashboard_view(request):
-    users=User.objects.all()
-    return render(request,"accounts/agent/agent_dashboard_view.html", {'users':users})
+    users = User.objects.all()
+    return render(request, "accounts/agent/agent_dashboard_view.html", {'users': users})
 
-#pending
+# pending
+
+
 @role_required(["agent"])
-def agents_deleted_associates(request,id):
-    delete_users=get_object_or_404(User,id=id)
+def agents_deleted_associates(request, id):
+    delete_users = get_object_or_404(User, id=id)
     delete_users.delete()
-    messages.success(request,f'{delete_users.name},deleted successfully')
+    messages.success(request, f'{delete_users.name},deleted successfully')
     return redirect("admin.dashboard")
-
-
 
 
 @login_required
@@ -334,24 +402,26 @@ def create_associate(request):
 @login_required
 @role_required(["associate"])
 def associate_dashboard(request):
-    return render(request,"accounts/associate.html")
+    return render(request, "accounts/associate.html")
+
 
 @login_required
-@role_required(["associate","admin","agent"])
+@role_required(["associate", "admin", "agent"])
 def associate_tracking_updates(request):
     tasks = Task.objects.all().select_related('agent', 'associate')
     if request.user.role == "associate":
-    # Associate → only own history
-     histories = TaskHistory.objects.filter(
-        task__in=tasks,
-        updated_by=request.user
-    )
+        # Associate → only own history
+        histories = TaskHistory.objects.filter(
+            task__in=tasks,
+            updated_by=request.user
+        )
     else:
-    # Admin / Agent → see all histories
-     histories = TaskHistory.objects.filter(
-        task__in=tasks
-    )
-    return render(request,"accounts/associate/associate_index.html",{'histories': histories})
+        # Admin / Agent → see all histories
+        histories = TaskHistory.objects.filter(
+            task__in=tasks
+        )
+    return render(request, "accounts/associate/associate_index.html", {'histories': histories})
+
 
 @login_required
 @role_required(["agent"])
@@ -396,6 +466,9 @@ def agent_assign_task(request, name):
 @login_required
 @role_required(["agent"])
 def agent_update_task(request, id):
+    if not request.user.has_perm("accounts.can_update_task"):
+        return HttpResponseRedirect("you can't update task")
+
     task = get_object_or_404(Task, id=id, agent=request.user)
 
     associates = User.objects.filter(role="associate")
@@ -424,6 +497,7 @@ def agent_update_task(request, id):
         {"tasks": task, "associates": associates},
     )
 
+
 @role_required(["agent"])
 def delete_task(request, id):
     task = get_object_or_404(Task, id=id, agent=request.user)
@@ -442,39 +516,40 @@ def associate_view_task(request):
 @login_required
 @role_required(['associate'])
 def associate_update_task(request, id):
-    task_hisrories=TaskHistory.objects.last()
+    task_hisrories = TaskHistory.objects.last()
     task = get_object_or_404(Task, id=id, associate=request.user)
     if request.method == "POST":
-        description = request.POST.get("description") # input from associate
+        description = request.POST.get("description")  # input from associate
         status = request.POST.get("status")
-        note = request.POST.get("description") 
+        note = request.POST.get("description")
 
         # Update the task's current state
         task.status = status
         task.save()
 
         # Log the update in TaskHistory
-        task_his=TaskHistory.objects.create(
+        task_his = TaskHistory.objects.create(
             task=task,
             updated_by=request.user,
             client_response=note,
             status=status
         )
-        messages.success(request,"updated successfully")
+        messages.success(request, "updated successfully")
         return redirect('associate.dashboard')
 
-    return render(request, 'accounts/associate/update_task.html', {'task': task,'task_hisrories':task_hisrories})
+    return render(request, 'accounts/associate/update_task.html', {'task': task, 'task_hisrories': task_hisrories})
+
 
 @login_required
 @role_required(['admin'])
 def add_products(request):
     if request.method == "POST":
-        product_name=request.POST.get('p_name')
-        product_price=request.POST.get('price')
-        product_description=request.POST.get('description')
-        product_img=request.FILES.get("p_image")
-        created_at=request.POST.get('create_at')
-        
+        product_name = request.POST.get('p_name')
+        product_price = request.POST.get('price')
+        product_description = request.POST.get('description')
+        product_img = request.FILES.get("p_image")
+        created_at = request.POST.get('create_at')
+
         Properties.objects.create(
             name=product_name,
             price=product_price,
@@ -482,48 +557,50 @@ def add_products(request):
             created_at=created_at,
             image=product_img
         )
-        messages.success(request,"Product added Successfully")
+        messages.success(request, "Product added Successfully")
         return redirect('dashboard')
-    return render(request,'accounts/products/add_products.html')
+    return render(request, 'accounts/products/add_products.html')
+
 
 @login_required
 @role_required(['admin'])
 def list_products(request):
-    products=Properties.objects.all()
-    return render(request,"accounts/products/view_products.html",{'products':products})
+    products = Properties.objects.all()
+    return render(request, "accounts/products/view_products.html", {'products': products})
+
 
 @login_required
 @role_required(['admin'])
-def update_product(request,id):
-    product=get_object_or_404(Properties,id=id)
+def update_product(request, id):
+    product = get_object_or_404(Properties, id=id)
     if request.method == 'POST':
-        P_name=request.POST.get('p_name')
-        price=request.POST.get('price')
-        description=request.POST.get('description')
-        p_image=request.FILES.get('p_image')
-        updated_at=request.POST.get('updated_at')
+        P_name = request.POST.get('p_name')
+        price = request.POST.get('price')
+        description = request.POST.get('description')
+        p_image = request.FILES.get('p_image')
+        updated_at = request.POST.get('updated_at')
 
-        product.name=P_name
-        product.price=price
-        product.description=description
-        product.created_at=updated_at
+        product.name = P_name
+        product.price = price
+        product.description = description
+        product.created_at = updated_at
 
         if p_image:
-            product.image=p_image
+            product.image = p_image
 
         product.save()
-        messages.success(request,"Product Updated Successfully")
+        messages.success(request, "Product Updated Successfully")
         return redirect('dashboard')
-    
-    return render(request,'accounts/products/update_products.html',{'product':product})
+
+    return render(request, 'accounts/products/update_products.html', {'product': product})
+
 
 @role_required(['admin'])
-def delete_product(request,id):
-    product=get_object_or_404(Properties,id=id)
+def delete_product(request, id):
+    product = get_object_or_404(Properties, id=id)
     if request.method == "POST":
         product.delete()
         messages.success(request, "Product deleted successfully")
         return redirect("dashboard")
 
     return redirect('dashboard')
-    

@@ -1,0 +1,90 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}
+<title>Admin Permissions Dashboard</title>
+{% endblock title %}
+
+{% block agent_tasks %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-dark text-white rounded-top-4">
+                    <h5 class="mb-0">Assign Permissions</h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <!-- User Select -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select User</label>
+                            <select name="user_id" class="form-select" required >
+                                <option value="" disabled selected>-- Choose user --</option>
+                                {% for user in users %}
+                                <option value="{{ user.id }}" {% if selected_user and user.id == selected_user.id %}selected{% endif %}>
+                                    {{ user.email }} ({{ user.role|title }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Permissions -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Task Permissions</label>
+
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="permissions"
+                                    value="can_assign_task" id="perm_assign" {% if "can_assign_task" in user_permissions %}checked{% endif %}>
+                                <label class="form-check-label" for="perm_assign">
+                                    Can assign task
+                                </label>
+                            </div>
+
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="permissions"
+                                    value="can_update_task" id="perm_update" {% if "can_update_task" in user_permissions %}checked{% endif %}>
+                                <label class="form-check-label" for="perm_update">
+                                    Can update task
+                                </label>
+                            </div>
+
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="permissions"
+                                    value="can_view_all_tasks" id="perm_view" {% if "can_view_all_tasks" in user_permissions %}checked{% endif %}>
+                                <label class="form-check-label" for="perm_view">
+                                    Can view all tasks
+                                </label>
+                            </div>
+
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="permissions"
+                                    value="can_delete_task" id="perm_delete" {% if "can_delete_task" in user_permissions %}checked{% endif %}>
+                                <label class="form-check-label" for="perm_delete">
+                                    Can delete tasks
+                                </label>
+                            </div>
+                        </div>
+
+
+                        <!-- Submit -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary rounded-3">
+                                Save Permissions
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock agent_tasks %}

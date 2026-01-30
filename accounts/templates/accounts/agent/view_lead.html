@@ -69,18 +69,20 @@
 
           <td class="">
             <div class="d-flex justify-content-center align-items-center">
+              {% if perms.accounts.can_update_task %}
               <a href="#" class="btn btn-sm btn-outline-primary me-1" title="Edit lead">
-                <i class="bi bi-pencil-square"></i>
+               edit
               </a>
+              {% endif %}
 
-              <a href="{% url 'agent.assign_lead.dashboard' lead.name %}" class="btn btn-sm btn-outline-primary me-1"
+              <a href="{% url 'agent.assign_lead.dashboard' lead.name %}" class="btn btn-sm btn-outline-success me-1"
                 title="assign lead">
                 assign
               </a>
 
               <a href="{% url 'admin.delete.lead.dashboard' lead.id %}" class="btn btn-sm btn-outline-danger"
                 title="Delete lead">
-                <i class="bi bi-trash3"></i>
+                delete
               </a>
             </div>
           </td>

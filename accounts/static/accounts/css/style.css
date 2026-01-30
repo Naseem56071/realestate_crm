@@ -27,6 +27,10 @@
 .nav-links i{
   margin-right: 10px;
 }
+
+.form-check-input[type=checkbox] {
+  border: 1px solid black !important;
+}
  /* Mobile sidebar */
  @media (max-width: 991px) {
    .sidebar {
