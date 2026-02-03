@@ -1,9 +1,9 @@
 from django.db import models
 
 # Create your models here.
-from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from accounts.manager import UserManager
+from django.utils import timezone
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -16,6 +16,21 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=70, default=None)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    phone = models.CharField(
+        max_length=10,
+        unique=True,
+        null=True,
+        blank=True,
+        help_text="Enter 10 digit mobile number"
+    )
+    
+    created_by = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_associates"
+    )
 
     profile_image = models.ImageField(
         upload_to="users/profile/",
@@ -34,7 +49,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+class OTP(models.Model):
+    phone = models.CharField(max_length=10)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    def is_expired(self):
+        return timezone.now() > self.created_at + timezone.timedelta(minutes=5)
 
 class Task(models.Model):
 
@@ -60,6 +81,7 @@ class Task(models.Model):
         ("villa", "Villa"),
         ("commercial", "Commercial"),
     ]
+    
     name = models.CharField(max_length=100)
     email = models.EmailField(blank=True, default="")
     phone = models.CharField(max_length=20, default="")

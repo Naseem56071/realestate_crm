@@ -26,7 +26,7 @@
 <body>
 
     <!-- Top Navbar -->
-    <nav class="navbar navbar-dark bg-dark px-3">
+    <nav class="navbar navbar-dark bg-dark px-3 sticky-top">
         <button class="btn btn-outline-light d-lg-none" id="openSidebar">
             <i class="bi bi-list"></i>
         </button>
@@ -93,7 +93,8 @@
 
 
                 {% if request.user.role == 'admin' %}
-                <ul class="nav flex-column mt-3">
+                
+                <ul class="nav flex-column mt-3 ">
                     <li class="nav-item">
                         <a class="nav-link active nav-links" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i>
                             <span>Dashboard</span></a>
@@ -117,18 +118,17 @@
                         </div>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#userMenu1"><i
-                                class="bi bi-bookmark-fill"></i> <span>Products</span> </a>
+                    <li class="nav-item ">
+                        <a class="nav-link nav-links" data-bs-toggle="collapse" href="#userMenu1"><i class="bi bi-box-seam"></i> <span>Products</span> </a>
                         <div class="collapse" id="userMenu1">
                             <ul class="nav flex-column ms-3">
-                                <li><a class="nav-link" href="{% url 'admin.add_products.dashboard' %}"><i
+                                <li><a class="nav-link nav-links" href="{% url 'admin.add_products.dashboard' %}"><i
                                             class="bi bi-arrow-return-right"></i> <span>Add Products</span> </a>
                                 </li>
-                                <li><a class="nav-link" href="{% url 'admin.list_products/dashboard' %}"> <i
-                                            class="bi bi-arrow-return-right"></i> <span>view</span>
-                                        Products</a></li>
-                                <li><a class="nav-link" href="#"> coming soon</a></li>
+                                <li><a class="nav-link nav-links" href="{% url 'admin.list_products/dashboard' %}"> <i class="bi bi-arrow-return-right"></i>
+                                     <span>view Products</span></a></li>
+                                <li><a class="nav-link nav-links" href="#"><i class="bi bi-arrow-return-right"></i> coming soon</a></li>
+                                
 
                             </ul>
                         </div>
@@ -140,8 +140,9 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'assign_permissions' %}"><i class="bi bi-gear"></i> Permissions</a>
+                        <a class="nav-link nav-links" href="{% url 'assign_permissions' %}"><i class="bi bi-gear"></i>Permissions</a>
                     </li>
+                     <li><a class="nav-link nav-links" href="{% url 'contact-details' %}"><i class="bi bi-person-vcard"></i> Contacts</a></li>
 
                     {% elif request.user.role == 'agent' %}
                     <ul class="nav flex-column mt-3">
@@ -150,8 +151,8 @@
                                     class="bi bi-speedometer2"></i> <span>Dashboard</span> </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link nav-links" href="{% url 'agent.view.dashboard' %}"><i
-                                    class="bi bi-speedometer2"></i> <span>Agent Dashboard</span> </a>
+                            <a class="nav-link nav-links" href="{% url 'agent.view.dashboard' %}">
+                              <i class="bi bi-person"></i> <span>Agent Dashboard</span> </a>
                         </li>
                         <li><a class="nav-link nav-links" href="{% url 'associate.index.tracking.dashboard' %}">
                                 <i class="bi bi-arrow-return-right"></i> <span> Associates lead history </span></a></li>
@@ -175,24 +176,24 @@
 
                         {% elif request.user.role == 'associate' %}
                         <ul class="nav flex-column mt-3">
-                            <li class="nav-item">
+                            <li class="nav-item nav-links">
                                 <a class="nav-link active nav-links" href="{% url 'associate.dashboard' %}"><i
                                         class="bi bi-speedometer2"></i> <span>Dashboard</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link nav-links" href="{% url 'associate.index.tracking.dashboard' %}"><i
-                                        class="bi bi-speedometer2"></i> <span>associates dashboard</span></a>
+                                <a class="nav-link nav-links nav-links" href="{% url 'associate.index.tracking.dashboard' %}">
+                                   <i class="bi bi-person"></i> <span>associates dashboard</span></a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link nav-links" data-bs-toggle="collapse" href="#userMenu">
-                                    <i class="bi bi-list-task"></i> <span>tasks</span>
+                                    <i class="bi bi-list-task"></i> <span>leads</span>
                                 </a>
                                 <div class="collapse" id="userMenu">
                                     <ul class="nav flex-column ms-3">
-                                        <li><a class="nav-link" href="{% url 'associatetask.dashboard' %}"> view task
+                                        <li><a class="nav-link nav-links" href="{% url 'associatetask.dashboard' %}"> view lead
                                             </a></li>
 
-                                        <li><a class="nav-link" href="#"> coming soon</a></li>
+                                        <li><a class="nav-link nav-links" href="#"> coming soon</a></li>
                                     </ul>
                                 </div>
                             </li>
@@ -201,7 +202,7 @@
                             {% endif %}
 
                             <li class="nav-item">
-                                <a class="nav-link text-danger" href="{% url 'logout' %}"><i
+                                <a class="nav-link text-danger nav-links" href="{% url 'logout' %}"><i
                                         class="bi bi-box-arrow-right"></i>
                                     Logout</a>
                             </li>
@@ -214,7 +215,7 @@
 
 
             <!-- Main Content -->
-            <div class="col-lg-10 content">
+            <div class="col-lg-10 content main-content">
 
 
                 <div class="messages mt-2">

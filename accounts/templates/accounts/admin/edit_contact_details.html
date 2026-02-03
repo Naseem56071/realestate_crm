@@ -1,0 +1,52 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}
+<title> edit contact details</title>
+{% endblock title %}
+
+{% block agent_tasks %}
+
+<div class="container assign_task  mt-4">
+    <h3 class="update_title">Edit or Update Contact Details</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Task Title -->
+        <div class="mb-3">
+            <label class="form-label form_label">Enter or edit Name:</label>
+            <input type="text" name="name" value="{{ edit_contact.name }}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label form_label">Enter or edit Phone:</label>
+            <input type="number" name="phone" value="{{ edit_contact.phone }}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label form_label">Enter or edit Email:</label>
+            <input type="email" name="email" value="{{ edit_contact.email }}" class="form-control" required>
+        </div>
+
+        <!-- Buttons -->
+        <div class="submit_reset d-flex justify-content-between">
+            <div>
+                <button type="submit" class="btn btn-primary">
+                    Update Task
+                </button>
+
+                <button type="reset" class="btn btn-secondary ms-2">
+                    Reset
+                </button>
+            </div>
+
+            <div>
+                <button class="btn btn-success ms-2">
+                    <a href="{% url 'contact-details' %}" style="text-decoration: none; color:white">Back</a>
+                </button>
+            </div>
+        </div>
+
+    </form>
+</div>
+{% endblock agent_tasks %}

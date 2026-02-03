@@ -82,7 +82,7 @@
 
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ lead.name }}</td>
+                    <td>{{ lead.name | capfirst }}</td>
                     <td>{{ lead.email }}</td>
                     <td>{{ lead.phone }}</td>
                     <td>

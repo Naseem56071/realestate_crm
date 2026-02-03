@@ -79,11 +79,13 @@
                 title="assign lead">
                 assign
               </a>
+              {% if perms.accounts.can_delete_task %}
 
               <a href="{% url 'admin.delete.lead.dashboard' lead.id %}" class="btn btn-sm btn-outline-danger"
                 title="Delete lead">
                 delete
               </a>
+               {% endif %}
             </div>
           </td>
         </tr>

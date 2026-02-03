@@ -1,16 +1,18 @@
 import re
 from django.db.models import Count
 from datetime import datetime
+from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib import messages
-from django.http.response import HttpResponse, HttpResponseRedirect
+from django.http.response import HttpResponse
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from accounts.models import User, Task, TaskHistory, Properties
+from accounts.models import User, Task, TaskHistory, Properties, OTP
 from accounts.decorators import role_required
+from accounts.utils import send_sms, generate_otp
 
 
 # LOGIN VIEW
@@ -34,7 +36,7 @@ def login_view(request):
         except User.DoesNotExist:
             print("No user with this email")
             messages.error(request, "Invalid email or password")
-            return render(request, "accounts/login.html")
+            return redirect("login")
 
         user = authenticate(request, email=email, password=password)
         if user is not None and user.is_active:
@@ -53,14 +55,101 @@ def login_view(request):
                 return redirect("associate.dashboard")  # associate route
         else:
             messages.error(request, "Invalid email or password")
+            return redirect("login")
 
     return render(request, "accounts/login.html")
 
+#sends otp 
+def phone_login_view(request):
+    if request.method == "POST":
+        phone = request.POST.get("phone")
+
+        if not phone or not phone.isdigit() or len(phone) != 10:
+            messages.error(request, "Enter a valid 10-digit phone number")
+            return redirect("phone.login")
+
+        user = User.objects.filter(phone=phone, is_active=True).first()
+        if not user:
+            messages.error(request, "User not found")
+            return redirect("phone.login")
+
+        # 1️ Generate OTP
+        otp_code = generate_otp()
+
+        # 2 Send SMS FIRST
+        sms_success, sms_response = send_sms(phone, otp_code)
+
+        if not sms_success:
+            messages.error(request, "Failed to send OTP. Please try again.")
+            print("SMS ERROR:", sms_response)
+            return redirect("phone.login")
+
+        # 3️ Delete old OTPs
+        OTP.objects.filter(phone=phone).delete()
+
+        # 4️ Save OTP ONLY after SMS success
+        OTP.objects.create(phone=phone, otp=str(otp_code))
+
+        # 5️ Save phone in session
+        request.session["otp_phone"] = phone
+
+        messages.success(request, "OTP sent successfully")
+        return redirect("phone.otp-verify")
+    
+    return render(request, 'accounts/phone_num_login_otp.html')
+
+# checks otp and login to the page
+def verify_otp_view(request):
+    phone = request.session.get("otp_phone")
+
+    if not phone:
+        messages.error(request, "Session expired")
+        return redirect("phone.login")
+
+    if request.method == "POST":
+        entered_otp = request.POST.get("otp")
+
+        #  1. Fetch OTP from DB
+        otp_obj = OTP.objects.filter(phone=phone).first()
+        if not otp_obj:
+            messages.error(request, "OTP expired")
+            return redirect("phone.login")
+
+        #  2. Check expiry
+        if otp_obj.is_expired():
+            otp_obj.delete()
+            messages.error(request, "OTP expired")
+            return redirect("phone.login")
+
+        #  3. MATCH OTP
+        if otp_obj.otp != entered_otp:
+            messages.error(request, "Invalid OTP")
+            return redirect("phone.otp-verify")
+
+        #  4. OTP MATCHED → LOGIN USER
+        else:
+            user = User.objects.get(phone=phone)
+            auth_login(request, user)
+            #  5. CLEANUP
+            otp_obj.delete()
+            del request.session["otp_phone"]
+            messages.success(request, f"{user.name}, Logged in successfully!")
+            #  Role-based redirect
+            if user.role == "admin":
+                return redirect("dashboard")
+            elif user.role == "agent":
+                return redirect("agent.dashboard")
+            else:
+                return redirect("associate.dashboard")
+
+    return render(request, "accounts/verify_otp.html")
+
 
 @login_required
+@role_required(["admin"])
 def assign_permissions(request):
     if request.user.role != "admin":
-        return HttpResponseRedirect("you dont have permissin to access the permissions")
+        return HttpResponse("You don't have permission", status=403)
 
     users = User.objects.filter(role__in=["agent", "associate"])
     selected_user = None
@@ -130,7 +219,7 @@ def contact_us(request):
         if not re.fullmatch(r"\d{10}", phone):
             messages.error(
                 request, "Phone number must contain exactly 10 digits.")
-            return redirect(request.path)
+            return redirect("contact")
         # Example: save to DB or send email
         agent = (User.objects.filter(role="agent").annotate(task_count=Count("agent_tasks")).order_by("task_count", "id").first()
                  )
@@ -146,6 +235,49 @@ def contact_us(request):
         messages.success(request, "Your message has been sent successfully!")
         return redirect("contact")
     return render(request, 'accounts/contact.html')
+
+
+@login_required
+@role_required(['admin'])
+def contact_details(request):
+    tasks = Task.objects.all()
+    return render(request, "accounts/admin/contact_details.html", {'tasks': tasks})
+
+
+@login_required
+@role_required(["admin"])
+def edit_contact_details(request, id):
+    edit_contact = get_object_or_404(Task, id=id)
+    if request.method == 'POST':
+        edit_name = request.POST.get('name')
+        edit_phone = request.POST.get('phone')
+        edit_email = request.POST.get('email')
+
+        if not re.fullmatch(r"\d{10}", edit_phone):
+            messages.error(
+                request, "Phone number must contain exactly 10 digits.")
+            return redirect("contact-details")
+
+        edit_contact.name = edit_name
+        edit_contact.phone = edit_phone
+        edit_contact.email = edit_email
+        edit_contact.save()
+        messages.success(request, 'contact details updated successfully')
+        return redirect('contact-details')
+
+    return render(request, 'accounts/admin/edit_contact_details.html', {'edit_contact': edit_contact})
+
+
+@login_required
+@role_required(['admin'])
+def delete_contact_details(request, id):
+    delete_contact_details = get_object_or_404(Task, id=id)
+    if request.method == "POST":
+        delete_contact_details .delete()
+        messages.success(request, "deleted successfully")
+        return redirect("contact-details")
+
+    return redirect('contact-details')
 
 
 @login_required
@@ -202,8 +334,8 @@ def lead_details(request):
 
 
 @role_required(["admin", "agent"])
-def delete_lead_admin(request, id):
-    delete_task = get_object_or_404(User, id=id)
+def admin_delete_lead(request, id):
+    delete_task = get_object_or_404(Task, id=id)
     delete_task.delete()
     messages.success(request, f"{delete_task.name}, lead deleted successfully")
     return redirect('admin.lead_details.dashboard')
@@ -330,9 +462,9 @@ def create_associate(request):
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
         email = request.POST.get("email", "").strip()
-        role = request.POST.get("role")
-        password = request.POST.get("password")
-        confirm_password = request.POST.get("confirm-password")
+        role = request.POST.get("role", "").strip()
+        password = request.POST.get("password", "").strip()
+        confirm_password = request.POST.get("confirm-password", "").strip()
 
         # Name validation
         if not name:
@@ -386,13 +518,14 @@ def create_associate(request):
             return redirect("agent.dashboard")
 
         # Create agent
-        User.objects.create_user(
+        associate = User.objects.create_user(
             email=email,
             name=name,
             password=password,
             role=role,
         )
-
+        associate.created_by = request.user   # agent
+        associate.save()
         messages.success(request, "associate created successfully")
         return redirect("agent.dashboard")
 
@@ -426,7 +559,7 @@ def associate_tracking_updates(request):
 @login_required
 @role_required(["agent"])
 def agent_view_task(request):
-    leads = Task.objects.all()
+    leads = Task.objects.filter(agent=request.user)
 
     return render(request, "accounts/agent/view_lead.html", {"leads": leads})
 
@@ -434,7 +567,10 @@ def agent_view_task(request):
 @login_required
 @role_required(["agent"])
 def agent_assign_task(request, name):
-    associates = User.objects.filter(role="associate")
+    associates = User.objects.filter(
+        role="associate",
+        created_by=request.user
+    )
 
     task = get_object_or_404(Task, name=name, agent=request.user)
 
@@ -446,7 +582,8 @@ def agent_assign_task(request, name):
             messages.error(request, "Please select an associate.")
             return redirect(request.path)
 
-        associate = get_object_or_404(User, id=associate_id, role="associate")
+        associate = get_object_or_404(
+            User, id=associate_id, role="associate", created_by=request.user)
 
         #  UPDATE existing task
         task.associate = associate
@@ -467,7 +604,7 @@ def agent_assign_task(request, name):
 @role_required(["agent"])
 def agent_update_task(request, id):
     if not request.user.has_perm("accounts.can_update_task"):
-        return HttpResponseRedirect("you can't update task")
+        return HttpResponse("You can't update task", status=403)
 
     task = get_object_or_404(Task, id=id, agent=request.user)
 

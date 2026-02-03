@@ -1,0 +1,89 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}
+<title>contact details</title>
+{% endblock title %}
+
+{% block agent_tasks %}
+
+
+<div class="container mt-5">
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-hover">
+            <h3 class="mb-4">Clients Contact Details:</h3>
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Client Name</th>
+                    <th>Client phone</th>
+                    <th>Client Email</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tasks %}
+
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ t.name.capitalize }}</td>
+                    <td>{{ t.phone }}</td>
+                    <td>{{ t.email }}</td>
+
+                    <td>
+                        <div class="actions-btn ">
+                            <a href="{% url 'admin.edit.contact-details' t.id %}"
+                                class="btn btn-sm btn-outline-primary me-1" title="Edit Details">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                data-bs-target="#deleteModal{{ t.id }}">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                            <div class="modal fade" id="deleteModal{{ t.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+
+                                        <div class="modal-header">
+                                            <h5 class="modal-title text-danger">Confirm Delete:</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+
+                                        <div class="modal-body">
+                                            Are you sure you want to delete
+                                            <strong>{{ t.name }}</strong>?
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <!-- NO -->
+                                            <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                                                No
+                                            </button>
+
+                                            <!-- YES -->
+                                            <form method="POST"
+                                                action="{% url 'admin-delete-contact-details' t.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">
+                                                    Yes, Delete
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock agent_tasks %}

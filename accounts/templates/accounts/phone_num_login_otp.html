@@ -1,0 +1,33 @@
+{% extends "accounts/login.html" %}
+{% block title%}
+<title>login with otp</title>
+{% endblock title %}
+
+{% block content %}
+<div class="card-body p-4">
+    <p class="text-center m-0">Login With Phone</p>
+    <p class="text-center text-muted">Enter mobile number we send otp to registered mobile number</p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!--Phone-->
+        <div class="mb-3">
+            <label class="form-label">Phone Number:</label>
+            <div class="input-group">
+                <span class="input-group-text login-icons">
+                    <i class="bi bi-telephone-fill " style="color: #0d6efd;">+91</i>
+                </span>
+                <input type="text" name="phone" class="form-control" placeholder="Enter Phone Number" required>
+            </div>
+        </div>
+
+        <!-- Login Button -->
+        <button type="submit" class="btn btn-primary w-100">
+            submit
+        </button>
+    </form>
+   
+</div>
+
+{% endblock content %}

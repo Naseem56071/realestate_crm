@@ -1,7 +1,17 @@
- body {
+*{
+  padding: 0px;
+  margin: 0px;
+  box-sizing: border-box;
+}
+body {
    overflow-x: hidden;
  }
-
+ .dropdown-menu-end[data-bs-popper] {
+    right: 0;
+    left: -60px;
+    top: 42px;
+ }
+   
  /* Sidebar */
  .sidebar {
    background: #212529;
@@ -31,6 +41,8 @@
 .form-check-input[type=checkbox] {
   border: 1px solid black !important;
 }
+
+
  /* Mobile sidebar */
  @media (max-width: 991px) {
    .sidebar {
@@ -74,7 +86,7 @@
  }
 
  .update_title {
-   width: 200px;
+   width: 400px;
    color: #3a62e5 !important;
    /* background: grey; */
    padding: 15px 0px;
@@ -111,3 +123,20 @@
      align-items: center !important;
    }
  }
+/* FIX sidebar on LARGE screens only */
+@media (min-width: 992px) {
+  .sidebar {
+    position: fixed;
+    top: 56px;              /* height of navbar */
+    left: 0;
+    width: 220px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    z-index: 1020;
+  }
+
+  /* Push page content to the right */
+  .main-content {
+    margin-left: 216px;
+  }
+}

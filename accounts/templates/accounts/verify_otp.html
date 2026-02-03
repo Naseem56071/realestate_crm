@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Verify OTP</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-md-4">
+
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+
+                        <h4 class="text-center mb-3">OTP Verification</h4>
+                        <p class="text-center text-muted mb-4">
+                            Enter the OTP sent to your mobile number
+                        </p>
+
+                        <!-- Django Messages -->
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        <form method="POST">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label class="form-label">Enter OTP</label>
+                                <input type="text" name="otp" class="form-control text-center"
+                                    placeholder="Enter 6-digit OTP" maxlength="6" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                Verify OTP
+                            </button>
+                        </form>
+
+                        <!-- Optional: Resend OTP -->
+                        <div class="text-center mt-3">
+                            <a href="#" class="text-decoration-none">
+                                Resend OTP
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
