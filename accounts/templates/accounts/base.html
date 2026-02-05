@@ -235,17 +235,20 @@
                     {% endfor %}
                     {% endif %}
                 </div>
-
-                <h3>Dashboard</h3>
+                
+                {% block heading %}
+                   <h3>Dashboard</h3>
+                {% endblock  %}
+               
 
                 {% block welcome %}
 
                 {% endblock welcome %}
 
                 <!-- Cards -->
-                {% block agent_tasks %}
+                {% block content_start %}
 
-                {% endblock agent_tasks %}
+                {% endblock %}
 
 
             </div>

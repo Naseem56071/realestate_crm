@@ -24,7 +24,7 @@ def send_sms(phone, otp):
 
         # smslogin returns JSON-like string with campid
 
-        if "campid" in text:
+        if response.status_code == 200 and "campid" in text:
             return True, text
         else:
             return False, text

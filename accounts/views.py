@@ -1,7 +1,7 @@
 import re
 from django.db.models import Count
-from datetime import datetime
 from django.utils import timezone
+from datetime import timedelta, datetime, time
 from django.utils.dateparse import parse_datetime
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -13,6 +13,34 @@ from django.contrib.contenttypes.models import ContentType
 from accounts.models import User, Task, TaskHistory, Properties, OTP
 from accounts.decorators import role_required
 from accounts.utils import send_sms, generate_otp
+
+
+def contact_us(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        message = request.POST.get("message")
+        if not re.fullmatch(r"\d{10}", phone):
+            messages.error(
+                request, "Phone number must contain exactly 10 digits.")
+            return redirect("contact")
+        # Example: save to DB or send email
+        agent = (User.objects.filter(role="agent").annotate(
+            task_count=Count("agent_tasks")).order_by("task_count", "id").first())
+
+        Task.objects.create(
+            name=name,
+            email=email,
+            phone=phone,
+            description=message,
+            agent=agent,
+
+        )
+
+        messages.success(request, "Your message has been sent successfully!")
+        return redirect("contact")
+    return render(request, 'accounts/contact.html')
 
 
 # LOGIN VIEW
@@ -59,7 +87,9 @@ def login_view(request):
 
     return render(request, "accounts/login.html")
 
-#sends otp 
+# sends otp
+
+
 def phone_login_view(request):
     if request.method == "POST":
         phone = request.POST.get("phone")
@@ -79,6 +109,8 @@ def phone_login_view(request):
         # 2 Send SMS FIRST
         sms_success, sms_response = send_sms(phone, otp_code)
 
+        print(sms_response)
+
         if not sms_success:
             messages.error(request, "Failed to send OTP. Please try again.")
             print("SMS ERROR:", sms_response)
@@ -95,11 +127,14 @@ def phone_login_view(request):
 
         messages.success(request, "OTP sent successfully")
         return redirect("phone.otp-verify")
-    
+
     return render(request, 'accounts/phone_num_login_otp.html')
 
 # checks otp and login to the page
+
+
 def verify_otp_view(request):
+    # getting phone number from server
     phone = request.session.get("otp_phone")
 
     if not phone:
@@ -150,17 +185,20 @@ def verify_otp_view(request):
 def assign_permissions(request):
     if request.user.role != "admin":
         return HttpResponse("You don't have permission", status=403)
-
+    # load users(agents and asscoaites)
     users = User.objects.filter(role__in=["agent", "associate"])
+    # initial variables
     selected_user = None
     user_permissions = []
 
+    # Get ContentType for Task model
     content_type = ContentType.objects.get_for_model(Task)
 
     # Get user_id from GET when user selects a user
     user_id = request.GET.get("user_id")
     if user_id:
         selected_user = get_object_or_404(User, id=user_id)
+
         # Load assigned permissions for this user
         user_permissions = selected_user.user_permissions.filter(
             content_type=content_type
@@ -208,33 +246,6 @@ def logout_view(request):
     messages.success(
         request, f"{username}, You have been logged out successfully.")
     return redirect("login")
-
-
-def contact_us(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        email = request.POST.get("email")
-        phone = request.POST.get("phone")
-        message = request.POST.get("message")
-        if not re.fullmatch(r"\d{10}", phone):
-            messages.error(
-                request, "Phone number must contain exactly 10 digits.")
-            return redirect("contact")
-        # Example: save to DB or send email
-        agent = (User.objects.filter(role="agent").annotate(task_count=Count("agent_tasks")).order_by("task_count", "id").first()
-                 )
-        Task.objects.create(
-            name=name,
-            email=email,
-            phone=phone,
-            description=message,
-            agent=agent,
-
-        )
-
-        messages.success(request, "Your message has been sent successfully!")
-        return redirect("contact")
-    return render(request, 'accounts/contact.html')
 
 
 @login_required
@@ -323,14 +334,80 @@ def admin_deletes_agents_associates(request, id):
 
 @login_required
 @role_required(["admin"])
-def lead_details(request):
+def list_lead_details(request):
+
     leads = Task.objects.all()
-    total_leads = Task.objects.count()
-    pending_leads = Task.objects.filter(status='pending').count()
-    new_leads = Task.objects.filter(status='new').count()
-    in_progress_lead = Task.objects.filter(status='in_progress').count()
-    completed_leads = Task.objects.filter(status="completed").count()
-    return render(request, 'accounts/admin/lead_details.html', {"leads": leads, "total_leads": total_leads, "pending_leads": pending_leads, "new_leads": new_leads, "completed_leads": completed_leads, "in_progress_lead": in_progress_lead})
+
+    today = timezone.localdate()
+    yesterday = today - timedelta(days=1)
+    start_of_week = today - timedelta(days=7)
+
+    date_filter = request.GET.get("date")
+
+    if date_filter == "today":
+        start = timezone.make_aware(datetime.combine(today, time.min))
+        end = timezone.make_aware(datetime.combine(today, time.max))
+        leads = leads.filter(created_at__range=(start, end))
+
+    elif date_filter == "yesterday":
+        start = timezone.make_aware(datetime.combine(yesterday, time.min))
+        end = timezone.make_aware(datetime.combine(yesterday, time.max))
+        leads = leads.filter(created_at__range=(start, end))
+
+    elif date_filter == "this-week":
+        start = timezone.make_aware(datetime.combine(start_of_week, time.min))
+        end = timezone.make_aware(datetime.combine(today, time.max))
+        leads = leads.filter(created_at__range=(start, end))
+    else:
+        leads = Task.objects.all()
+
+    total_leads = leads.count()
+    pending_leads = leads.filter(status="pending").count()
+    new_leads = leads.filter(status="new").count()
+    in_progress_lead = leads.filter(status="in_progress").count()
+    completed_leads = leads.filter(status="completed").count()
+
+    return render(
+        request,
+        "accounts/admin/lead_details.html",
+        {
+            "leads": leads,
+            "date_filter": date_filter,
+            "total_leads": total_leads,
+            "pending_leads": pending_leads,
+            "new_leads": new_leads,
+            "completed_leads": completed_leads,
+            "in_progress_lead": in_progress_lead,
+        }
+    )
+
+
+def create_lead(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        message = request.POST.get("message")
+        if not re.fullmatch(r"\d{10}", phone):
+            messages.error(
+                request, "Phone number must contain exactly 10 digits.")
+            return redirect("admin.create-lead.dashbiard")
+        # Example: save to DB or send email
+        agent = (User.objects.filter(role="agent").annotate(
+            task_count=Count("agent_tasks")).order_by("task_count", "id").first())
+
+        Task.objects.create(
+            name=name,
+            email=email,
+            phone=phone,
+            description=message,
+            agent=agent,
+
+        )
+
+        messages.success(request, "Your message has been sent successfully!")
+        return redirect("admin.lead_details.dashboard")
+    return render(request, 'accounts/admin/create_lead.html')
 
 
 @role_required(["admin", "agent"])
@@ -350,7 +427,7 @@ def admin_dashboard(request):
 
 @login_required
 @role_required(["admin"])
-def create_agent(request):
+def admin_create_agent(request):
     #  Only admin can create agent
     if request.user.role != "admin":
         messages.error(request, "Unauthorized access")
@@ -415,7 +492,7 @@ def create_agent(request):
             return redirect("dashboard")
 
         # Create agent
-        user = User.objects.create_user(
+        User.objects.create_user(
             email=email,
             name=name,
             password=password,
@@ -440,8 +517,6 @@ def agent_dashboard_view(request):
     users = User.objects.all()
     return render(request, "accounts/agent/agent_dashboard_view.html", {'users': users})
 
-# pending
-
 
 @role_required(["agent"])
 def agents_deleted_associates(request, id):
@@ -453,7 +528,7 @@ def agents_deleted_associates(request, id):
 
 @login_required
 @role_required(["agent"])
-def create_associate(request):
+def agent_create_associate(request):
     #  Only agent can create agent
     if request.user.role != "agent":
         messages.error(request, "Unauthorized access")
@@ -573,11 +648,10 @@ def agent_assign_task(request, name):
     )
 
     task = get_object_or_404(Task, name=name, agent=request.user)
-
+    assigned_date_time = timezone.now()
     if request.method == "POST":
-        associate_id = request.POST.get("associate")
-        assigned_date_time = request.POST.get("assigned_date_time")
 
+        associate_id = request.POST.get("associate")
         if not associate_id:
             messages.error(request, "Please select an associate.")
             return redirect(request.path)
@@ -614,15 +688,12 @@ def agent_update_task(request, id):
         task.title = request.POST.get("title")
         task.description = request.POST.get("description")
 
-        start_time = request.POST.get("start_time")
-        if start_time:
-            task.created_at = parse_datetime(start_time)
-
         associate_id = request.POST.get("associate")
 
         associate_id = request.POST.get("associate")
         task.associate = get_object_or_404(
             User, id=associate_id, role="associate")
+        task.updated_at = timezone.now()
 
         task.save()
         messages.success(request, "Task updated successfully")
@@ -656,16 +727,18 @@ def associate_update_task(request, id):
     task_hisrories = TaskHistory.objects.last()
     task = get_object_or_404(Task, id=id, associate=request.user)
     if request.method == "POST":
-        description = request.POST.get("description")  # input from associate
+
         status = request.POST.get("status")
-        note = request.POST.get("description")
+        note = request.POST.get("description")   # input from associate
+        updated_at = timezone.now()
 
         # Update the task's current state
+        task.updated_at = updated_at
         task.status = status
         task.save()
 
         # Log the update in TaskHistory
-        task_his = TaskHistory.objects.create(
+        TaskHistory.objects.create(
             task=task,
             updated_by=request.user,
             client_response=note,
@@ -681,11 +754,11 @@ def associate_update_task(request, id):
 @role_required(['admin'])
 def add_products(request):
     if request.method == "POST":
+        created_at = timezone.now()
         product_name = request.POST.get('p_name')
         product_price = request.POST.get('price')
         product_description = request.POST.get('description')
         product_img = request.FILES.get("p_image")
-        created_at = request.POST.get('create_at')
 
         Properties.objects.create(
             name=product_name,
@@ -715,12 +788,12 @@ def update_product(request, id):
         price = request.POST.get('price')
         description = request.POST.get('description')
         p_image = request.FILES.get('p_image')
-        updated_at = request.POST.get('updated_at')
+        updated_at = timezone.now()
 
         product.name = P_name
         product.price = price
         product.description = description
-        product.created_at = updated_at
+        product.updated_at = updated_at
 
         if p_image:
             product.image = p_image

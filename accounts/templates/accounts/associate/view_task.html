@@ -3,10 +3,15 @@
 {% block title %}
 <title>associate taks</title>
 {% endblock title %}
+{% block heading %}
+<h3></h3>
+{% endblock %}
+
 {% block welcome %}
 {% endblock welcome %}
 
-{% block agent_tasks %}
+{% block content_start %}
+
 <div class="table-responsive">
   <table class="table table-bordered table-hover align-middle text-center">
     <thead class="table-dark">
@@ -46,14 +51,15 @@
         </td>
 
         <td class="">
-          <a href="{% url 'associatetask.update.dashboard' task.id %}" class="btn btn-sm btn-outline-primary " title="Update Task">
+          <a href="{% url 'associatetask.update.dashboard' task.id %}" class="btn btn-sm btn-outline-primary "
+            title="Update Task">
             update task
           </a>
         </td>
       </tr>
       {% empty %}
       <tr>
-        <td colspan="8"lass="text-muted py-4">
+        <td colspan="8" lass="text-muted py-4">
           No tasks found
         </td>
       </tr>
@@ -62,4 +68,4 @@
   </table>
 </div>
 
-{% endblock agent_tasks %}
+{% endblock %}

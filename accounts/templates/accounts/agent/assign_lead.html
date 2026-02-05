@@ -8,7 +8,7 @@
 {% endblock welcome %}
 
 
-{% block agent_tasks %}
+{% block content_start %}
 
 
 
@@ -18,10 +18,7 @@
     <form method="POST">
         {% csrf_token %}
 
-        <div class="mb-3">
-            <label for="start_time">Assigned at:</label>
-            <input type="datetime-local" name="assigned_date_time" class="form-control" required>
-        </div>
+
 
         <div class="mb-3">
             <label>Assign to Associate</label>
@@ -39,9 +36,9 @@
             Assign Task
         </button>
 
-         <button class="btn btn-secondary my-2">
-          <a href="{% url 'agent.view_task.dashboard' %}" class="text-white text-decoration-none">back</a>
+        <button class="btn btn-secondary my-2">
+            <a href="{% url 'agent.view_task.dashboard' %}" class="text-white text-decoration-none">back</a>
         </button>
     </form>
 </div>
-{% endblock agent_tasks %}
+{% endblock %}

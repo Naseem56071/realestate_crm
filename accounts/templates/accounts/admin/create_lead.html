@@ -1,0 +1,58 @@
+{% extends 'accounts/base.html' %}
+{% block title %}
+<title>create lead</title>
+{% endblock title %}
+
+{% block content_start %}
+<div class="container assign_task  mt-4">
+    <h3 class="update_title">Create Lead</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Task Title -->
+        <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="name" class="form-control" placeholder="Enter your name" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Email Address</label>
+            <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Phone Number</label>
+            <input type="text" name="phone" class="form-control" placeholder="Enter your phone number">
+        </div>
+
+
+
+        <div class="mb-3">
+            <label class="form-label">Message</label>
+            <textarea name="message" rows="4" class="form-control" placeholder="Write your message..."
+                required></textarea>
+        </div>
+        <!-- Buttons -->
+        <div class="submit_reset d-flex justify-content-between">
+            <div>
+                <button type="submit" class="btn btn-primary">
+                    Update Task
+                </button>
+
+                <button type="reset" class="btn btn-secondary ms-2">
+                    Reset
+                </button>
+            </div>
+
+            <div>
+                <button class="btn btn-success ms-2">
+                    <a href="{% url 'admin.lead_details.dashboard' %}" style="text-decoration: none; color:white">Back</a>
+                </button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

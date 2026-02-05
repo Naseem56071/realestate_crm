@@ -1,6 +1,10 @@
 {% extends 'accounts/base.html' %}
 {% block title %} <title>Admin dashboard</title>{% endblock title %}
-{% block agent_tasks %}
+{% block heading %}
+
+{% endblock %}
+
+{% block content_start %}
 
 {% if request.user.role == 'admin' %}
 
@@ -145,7 +149,7 @@
                     <td>{{ user.name }}</td>
                     <td>{{ user.email }}</td>
                     <td>{{ user.role }}</td>
-                   
+
                     <td>
                         {% if user.is_active %}
                         <span class="text-dark bg-info-subtle p-1 rounded">Active</span>
@@ -154,13 +158,47 @@
                     </td>
                     <td>
                         <div class="actions-btn ">
-                        <a href="#" class="btn btn-sm btn-outline-primary me-1" title="Edit Task">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
+                            <!-- <a href="#" class="btn btn-sm btn-outline-primary me-1" title="Edit Task">
+                                <i class="bi bi-pencil-square"></i>
+                            </a> -->
 
-                        <a href="{% url 'admin.delete.agent.associate.dashboard' user.id %}" class="btn btn-sm btn-outline-danger" title="Delete Task">
-                            <i class="bi bi-trash3"></i>
-                        </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                data-bs-target="#deleteModal{{ user.id }}">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                            <div class="modal fade" id="deleteModal{{ user.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+
+                                        <div class="modal-header">
+                                            <h5 class="modal-title text-danger">Confirm Delete:</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+
+                                        <div class="modal-body">
+                                            Are you sure you want to delete
+                                            <strong>{{ user.name }}</strong>?
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <!-- NO -->
+                                            <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                                                No
+                                            </button>
+
+                                            <!-- YES -->
+                                            <form method="POST"
+                                                action="{% url 'admin.delete.agent.associate.dashboard' user.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">
+                                                    Yes, Delete
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -179,4 +217,4 @@
 
 {% endif %}
 
-{% endblock agent_tasks %}
+{% endblock %}

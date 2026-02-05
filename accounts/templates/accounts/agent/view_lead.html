@@ -1,5 +1,5 @@
 {% extends 'accounts/agent/dashboard.html' %}
-
+{% load tz %}
 {% block title %}
 
 <title>agent view task</title>
@@ -8,7 +8,7 @@
 {% block welcome %}
 {% endblock welcome %}
 
-{% block agent_tasks %}
+{% block content_start %}
 
 <!-- leads details -->
 <div class="container mt-5">
@@ -53,11 +53,12 @@
             Not assigned yet
             {% endif %}
           </td>
-          <td>{% if lead.status == 'pending' %}
+          <td>
+            {% if lead.status == 'pending' %}
             <span class="badge bg-warning text-dark">Pending</span>
             {% elif lead.status == 'in_progress' %}
             <span class="badge bg-info text-dark">In Progress</span>
-            {% elif h.lead.status == 'completed' %}
+            {% elif lead.status == 'completed' %}
             <span class="badge bg-success">Completed</span>
             {% else %}
             <span class="badge bg-secondary">{{ lead.status }}</span>
@@ -70,8 +71,10 @@
           <td class="">
             <div class="d-flex justify-content-center align-items-center">
               {% if perms.accounts.can_update_task %}
-              <a href="#" class="btn btn-sm btn-outline-primary me-1" title="Edit lead">
-               edit
+
+              <a href="{% url 'agent.update_task.dashboard' lead.id %}" class="btn btn-sm btn-outline-primary me-1"
+                title="Edit lead">
+                edit
               </a>
               {% endif %}
 
@@ -85,7 +88,7 @@
                 title="Delete lead">
                 delete
               </a>
-               {% endif %}
+              {% endif %}
             </div>
           </td>
         </tr>
@@ -100,4 +103,4 @@
 </div>
 <!-- end -->
 
-{% endblock agent_tasks %}
+{% endblock %}

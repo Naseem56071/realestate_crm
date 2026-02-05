@@ -22,7 +22,7 @@ urlpatterns = [
 
     path("admin/delete/agent/associate/dahboard/<int:id>/",
          views.admin_deletes_agents_associates, name="admin.delete.agent.associate.dashboard"),
-    path("create/agent/account/", views.create_agent,
+    path("create/agent/account/", views.admin_create_agent ,
          name="create.agent.account"),
     path("agent/dashboard/", views.agent_dashboard, name="agent.dashboard"),
     path("agent/dashboard/view/", views.agent_dashboard_view,
@@ -30,7 +30,7 @@ urlpatterns = [
     path("agent/delete/associates/dashboard/<int:id>/",
          views.agents_deleted_associates, name="agent.deletes.associates.dashboard"),
     path("create/associate/account",
-         views.create_associate,
+         views.agent_create_associate,
          name="create.associate.account",
          ),
     path("associate/dashboard/", views.associate_dashboard,
@@ -65,8 +65,10 @@ urlpatterns = [
     path('delete_product/dashboard/<int:id>/', views.delete_product,
          name='admin.delete_product.dashboard'),
 
-    path('admin/lead_details/dashboard/', views.lead_details,
+    path('lead/details/dashboard/', views.list_lead_details,
          name="admin.lead_details.dashboard"),
+     path('admin/create-lead/dashbiard/',views.create_lead,name='admin.create-lead.dashbiard'
+          ),
          
     path('admin/delete_lead/dashboard/<int:id>/',
          views.admin_delete_lead, name="admin.delete.lead.dashboard"),

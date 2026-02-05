@@ -1,10 +1,10 @@
-{% extends 'accounts/agent_dashboard.html' %}
+{% extends 'accounts/base.html' %}
 
 {% block title %}
 <title>Agent | Update Task</title>
 {% endblock title %}
 
-{% block agent_tasks %}
+{% block content_start %}
 
 <div class="container assign_task  mt-4">
     <h3 class="update_title">Update Task</h3>
@@ -31,13 +31,6 @@
         </div>
 
         <!-- Start Date & Time -->
-        <div class="mb-3">
-            <label class="form-label form_label">Update Date & Time</label>
-            <input type="datetime-local"
-                   name="start_time"
-                   value="{{ tasks.start_time|date:'Y-m-d\\TH:i' }}"
-                   class="form-control">
-        </div>
 
         <!-- Associate -->
         <div class="mb-3">
@@ -65,4 +58,4 @@
     </form>
 </div>
 
-{% endblock agent_tasks %}
+{% endblock %}

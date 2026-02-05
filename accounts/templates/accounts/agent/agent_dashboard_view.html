@@ -3,7 +3,12 @@
 <title>agent dashboard view</title>
 {% endblock title %}
 
-{% block agent_tasks %}
+{% block heading %}
+<h3></h3>
+{% endblock %}
+
+
+{% block content_start %}
 
 
 
@@ -117,13 +122,48 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="#" class="btn btn-sm btn-outline-primary me-1" title="Edit Task">
+                        <!-- <a href="#" class="btn btn-sm btn-outline-primary me-1" title="Edit Task">
                             <i class="bi bi-pencil-square"></i>
-                        </a>
+                        </a> -->
 
-                        <a href="{% url 'agent.deletes.associates.dashboard' user.id %}" class="btn btn-sm btn-outline-danger" title="Delete Task">
+
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                            data-bs-target="#deleteModal{{ user.id }}">
                             <i class="bi bi-trash3"></i>
-                        </a>
+                        </button>
+                        <div class="modal fade" id="deleteModal{{ user.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+
+                                    <div class="modal-header">
+                                        <h5 class="modal-title text-danger">Confirm Delete:</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+
+                                    <div class="modal-body">
+                                        Are you sure you want to delete
+                                        <strong>{{ user.name }}</strong>?
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <!-- NO -->
+                                        <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                                            No
+                                        </button>
+
+                                        <!-- YES -->
+                                        <form method="POST"
+                                            action="{% url 'agent.deletes.associates.dashboard' user.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger">
+                                                Yes, Delete
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 {% endif %}
@@ -140,4 +180,4 @@
 
 
 
-{% endblock agent_tasks %}
+{% endblock %}

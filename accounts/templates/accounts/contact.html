@@ -11,71 +11,105 @@
 
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <style>
+        .login-messages {
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        .login-icons {
+            font-size: 20px !important;
+            padding: 5px 10px !important;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
-    {% if messages %}
-    {% for message in messages %}
-    {% if message.tags == 'error' %}
-    <div class="alert alert-danger alert-dismissible fade show auto-dismiss" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% elif message.tags == 'success' %}
-    <div class="alert alert-success alert-dismissible fade show auto-dismiss" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endif %}
-    {% endfor %}
-    {% endif %}
-    <!-- Center Wrapper -->
-    <div class="container min-vh-100 d-flex justify-content-center align-items-center">
-        <div class="row w-100 justify-content-center">
-            <div class="col-12 col-sm-10 col-md-8 col-lg-5">
 
-                <form method="post" action="" class="card p-4 shadow-lg border-0 rounded-4">
-                    {% csrf_token %}
+    <body class="bg-light">
 
-                    <h4 class="mb-4 text-center fw-bold">
-                        <i class="bi bi-envelope-fill text-primary"></i> Contact Us
-                    </h4>
+        {% if messages %}
+        <div class="container mt-3">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    {% for message in messages %}
 
-                    <div class="mb-3">
-                        <label class="form-label">Full Name</label>
-                        <input type="text" name="name" class="form-control" placeholder="Enter your name" required>
+                    {% if message.tags == 'success' %}
+                    <div class="alert alert-success alert-dismissible fade show auto-dismiss" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Email Address</label>
-                        <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+                    {% elif message.tags == 'error' %}
+                    <div class="alert alert-danger alert-dismissible fade show auto-dismiss" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Phone Number</label>
-                        <input type="text" name="phone" class="form-control" placeholder="Enter your phone number">
-                    </div>
-
-
-
-                    <div class="mb-3">
-                        <label class="form-label">Message</label>
-                        <textarea name="message" rows="4" class="form-control" placeholder="Write your message..."
-                            required></textarea>
-                    </div>
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="bi bi-send-fill"></i> Send Message
-                        </button>
-                    </div>
-
-                </form>
-
+                    {% endif %}
+                    {% endfor %}
+                </div>
             </div>
         </div>
-    </div>
+        {% endif %}
 
-</body>
+        <!-- Center Wrapper -->
+        <div class="container min-vh-100 d-flex justify-content-center align-items-center">
+            <div class="row w-100 justify-content-center">
+                <div class="col-12 col-sm-10 col-md-8 col-lg-5">
+
+                    <form method="post" action="" class="card p-4 shadow-lg border-0 rounded-4">
+                        {% csrf_token %}
+
+                        <h4 class="mb-4 text-center fw-bold text-primary">
+                            <i class="bi bi-envelope-fill text-primary"></i> Contact Us
+                        </h4>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Full Name :</strong></label>
+                            <input type="text" name="name" class="form-control" placeholder="Enter your name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Email Address :</strong></label>
+                            <input type="email" name="email" class="form-control" placeholder="Enter your email"
+                                required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Phone Number :</strong></label>
+                            <input type="text" name="phone" class="form-control" placeholder="Enter your phone number">
+                        </div>
+
+
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Message :</strong></label>
+                            <textarea name="message" rows="4" class="form-control" placeholder="Write your message..."
+                                required></textarea>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send-fill"></i> Send Message
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+        <script>
+            setTimeout(() => {
+                document.querySelectorAll('.auto-dismiss').forEach(alert => {
+                    new bootstrap.Alert(alert).close();
+                });
+            }, 5000);
+        </script>
+    </body>
 
 </html>
