@@ -3,88 +3,76 @@
 {% block title %}
 <title>Admin Permissions Dashboard</title>
 {% endblock title %}
-
+{% block heading %}
+<h3 class="ps-2">Permissions :</h3>
+{% endblock  %}
 {% block content_start %}
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8">
+<div class="container mt-4">
 
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-header bg-dark text-white rounded-top-4">
-                    <h5 class="mb-0">Assign Permissions</h5>
-                </div>
-
-                <div class="card-body p-4">
-
-                    <form method="POST">
-                        {% csrf_token %}
-
-                        <!-- User Select -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Select User</label>
-                            <select name="user_id" class="form-select" required >
-                                <option value="" disabled selected>-- Choose user --</option>
-                                {% for user in users %}
-                                <option value="{{ user.id }}" {% if selected_user and user.id == selected_user.id %}selected{% endif %}>
-                                    {{ user.email }} ({{ user.role|title }})
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Permissions -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Task Permissions</label>
-
-                            <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" name="permissions"
-                                    value="can_assign_task" id="perm_assign" {% if "can_assign_task" in user_permissions %}checked{% endif %}>
-                                <label class="form-check-label" for="perm_assign">
-                                    Can assign task
-                                </label>
-                            </div>
-
-                            <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" name="permissions"
-                                    value="can_update_task" id="perm_update" {% if "can_update_task" in user_permissions %}checked{% endif %}>
-                                <label class="form-check-label" for="perm_update">
-                                    Can update task
-                                </label>
-                            </div>
-
-                            <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" name="permissions"
-                                    value="can_view_all_tasks" id="perm_view" {% if "can_view_all_tasks" in user_permissions %}checked{% endif %}>
-                                <label class="form-check-label" for="perm_view">
-                                    Can view all tasks
-                                </label>
-                            </div>
-
-                            <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" name="permissions"
-                                    value="can_delete_task" id="perm_delete" {% if "can_delete_task" in user_permissions %}checked{% endif %}>
-                                <label class="form-check-label" for="perm_delete">
-                                    Can delete tasks
-                                </label>
-                            </div>
-                        </div>
-
-
-                        <!-- Submit -->
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary rounded-3">
-                                Save Permissions
-                            </button>
-                        </div>
-
-                    </form>
-
-                </div>
-            </div>
-
-        </div>
+    <!-- Page Heading -->
+    <div class="mb-4">
+        <h4 class="fw-bold">Assign Permissions</h4>
+        <p class="text-muted mb-0">Enable or disable access for agents and associates</p>
     </div>
+
+    <!-- USER SELECTION (GET FORM) -->
+    <form method="GET">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Select User</label>
+                <select name="user_id" class="form-select" onchange="this.form.submit()">
+                    <option value="" disabled selected>-- Choose user --</option>
+                    {% for user in users %}
+                    <option value="{{ user.id }}" {% if selected_user and user.id == selected_user.id %}selected{% endif %}>
+                        {{ user.email }} ({{ user.role|title }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+
+    {% if selected_user %}
+    <!-- PERMISSIONS FORM (POST) -->
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="user_id" value="{{ selected_user.id }}">
+
+        <!-- Task Permissions -->
+        <div class="mb-3">
+            <h6 class="fw-bold mb-3">Task Permissions</h6>
+
+            <div class="row g-3">
+
+                {% for code, label in task_permissions %}
+                <div class="col-md-3">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="permissions" value="{{ code }}"
+                                    id="{{ code }}" {% if code in user_permissions %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold" for="{{ code }}">
+                                    {{ label }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary px-4">
+                Save Permissions
+            </button>
+        </div>
+    </form>
+    {% endif %}
+
 </div>
 
 {% endblock %}

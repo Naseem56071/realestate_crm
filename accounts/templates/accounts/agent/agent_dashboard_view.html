@@ -4,7 +4,7 @@
 {% endblock title %}
 
 {% block heading %}
-<h3></h3>
+<h3>Agent :</h3>
 {% endblock %}
 
 
@@ -99,7 +99,7 @@
             <h3 class="mb-4">All Associates Details:</h3>
             <thead class="table-dark">
                 <tr>
-
+                    <th>S.No</th>
                     <th>User Name</th>
                     <th>Email</th>
                     <th>Role</th>
@@ -112,6 +112,7 @@
                 {% if user.role == 'associate' %}
 
                 <tr>
+                    <td>{{ forloop.counter }}</td>
                     <td>{{ user.name }}</td>
                     <td>{{ user.email }}</td>
                     <td>{{ user.role }}</td>

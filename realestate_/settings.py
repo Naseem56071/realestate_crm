@@ -23,10 +23,10 @@ load_dotenv(BASE_DIR / ".env")
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-!_h&b^5g=7&c6bh%=xl_!(*ty#lo^hrzx6e%8=bnx&_d+hrg!("
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG") == "True"
 
 ALLOWED_HOSTS = []
 
@@ -132,8 +132,9 @@ AUTH_USER_MODEL = "accounts.User"
 
 LOGIN_URL = "/login/"
 
-SMS_USERNAME = "Ambati"
-SMS_API_KEY = "f325218b7fdc12c125b4"
-SMS_SENDER_ID = "SUNSEZ"
-SMS_TEMPLATE_ID = "1207173753963945777"
+SMS_USERNAME = os.getenv("SMS_USERNAME")
+SMS_API_KEY = os.getenv("SMS_API_KEY")
+SMS_SENDER_ID = os.getenv("SMS_SENDER_ID")
+SMS_TEMPLATE_ID = os.getenv("SMS_TEMPLATE_ID")
+
 

@@ -2,100 +2,178 @@
 {% block title %} <title> View products </title>{% endblock title %}
 
 {% block heading %}
-<h3>Property lists:</h3>
+<h3 class="ps-2">Property Details :</h3>
 {% endblock %}
 
 
 {% block content_start %}
 
+<div class="container">
+    <div class="d-flex justify-content-between mt-3 me-2 mb-1">
+        <form method="GET" class="filters" action="{% url 'admin.list_products.dashboard' %}">
+            <div class="d-flex align-items-center gap-2">
+                
+                <select name="location" class="form-select form-select-sm filter-select">
+                    <option value="#" selected disabled>-- Select Location --</option>
+            
+                <option value="hyderabad" {% if request.GET.location == 'hyderabad' %}selected{% endif %}>
+                  Hyderabad
+                </option>
+                <option value="bangalore" {% if request.GET.location == 'bangalore' %}selected{% endif %}>
+                  Bangalore
+                </option>
+                 <option value="chennai" {% if request.GET.location == 'chennai' %}selected{% endif %}>
+                  Chennai
+                </option>
 
-<div class="table-responsive">
-    <table class="table table-bordered table-hover align-middle text-center">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>Image</th>
-                <th>Created_at</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Price</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">
+                    Apply
+                </button>
+                
+            </div>
+        </form>
 
-        <tbody>
-            {% for product in products %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{% if product.image %}
-                    <img src="{{ product.image.url }}" width="80" class="img-thumbnail">
-                    {% else %}
-                    No Image
-                    {% endif %}
-                </td>
-                <td>{{ product.created_at|date:"d M Y,h:i A" }}</td>
-                <td>{{ product.name }}</td>
-                <td class="text-start">{{ product.description }}</td>
-                <td>{{ product.price }}</td>
+        <button class="btn btn-primary"><a href="{% url 'admin.add_products.dashboard' %}"
+                class="text-decoration-none text-white">create </a> <i class="bi bi-plus-square-fill"></i></button>
+    </div>
 
-                <td class="text-center action-icons">
-                    <a href="{% url 'admin.update_products.dashboard' product.id %}"
-                        class="btn btn-sm btn-outline-primary me-2 mt-2" data-bs-toggle="tooltip" title="Edit Product">
-                        <i class="bi bi-pencil-square"></i>
-                    </a>
-                    <button type="button" class="btn btn-sm btn-outline-danger mt-2" data-bs-toggle="modal"
-                        data-bs-target="#deleteModal{{ product.id }}">
-                        <i class="bi bi-trash3"></i>
-                    </button>
 
-                    <div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
+    <div class="table-responsive me-2">
+        <table class="table table-bordered table-hover align-middle text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Image</th>
+                    <th>Created_at</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Location</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
 
-                                <div class="modal-header">
-                                    <h5 class="modal-title text-danger">Confirm Delete:</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
+            <tbody>
+                {% for product in page_obj %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{% if product.image %}
+                        <img src="{{ product.image.url }}" width="80" class="img-thumbnail">
+                        {% else %}
+                        No Image
+                        {% endif %}
+                    </td>
+                    <td>{{ product.created_at|date:"d M Y,h:i A" }}</td>
+                    <td>{{ product.name }}</td>
+                    <td class="text-start">{{ product.description }}</td>
+                    <td>{{ product.location|capfirst }}</td>
+                    <td>{{ product.price }}</td>
 
-                                <div class="modal-body">
-                                    Are you sure you want to delete
-                                    <strong>{{ product.name }}</strong>?
-                                </div>
+                    <td class="text-center action-icons">
+                        <a href="{% url 'admin.update_products.dashboard' product.id %}"
+                            class="btn btn-sm btn-outline-primary me-2 mt-2" data-bs-toggle="tooltip"
+                            title="Edit Product">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-danger mt-2" data-bs-toggle="modal"
+                            data-bs-target="#deleteModal{{ product.id }}">
+                            <i class="bi bi-trash3"></i>
+                        </button>
 
-                                <div class="modal-footer">
-                                    <!-- NO -->
-                                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">
-                                        No
-                                    </button>
+                        <div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
 
-                                    <!-- YES -->
-                                    <form method="POST" action="{% url 'admin.delete_product.dashboard' product.id %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger">
-                                            Yes, Delete
+                                    <div class="modal-header">
+                                        <h5 class="modal-title text-danger">Confirm Delete:</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+
+                                    <div class="modal-body">
+                                        Are you sure you want to delete
+                                        <strong>{{ product.name }}</strong>?
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <!-- NO -->
+                                        <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                                            No
                                         </button>
-                                    </form>
-                                </div>
 
+                                        <!-- YES -->
+                                        <form method="POST"
+                                            action="{% url 'admin.delete_product.dashboard' product.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger">
+                                                Yes, Delete
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                </td>
-            </tr>
+                    </td>
+                </tr>
 
-            {% empty %}
-            <tr>
-                <td colspan="4" class="text-muted py-4">
-                    No tasks found
-                </td>
-            </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-muted py-4">
+                        No tasks found
+                    </td>
+                </tr>
 
-            {% endfor %}
-        </tbody>
+                {% endfor %}
+            </tbody>
+        </table>
+       {% if page_obj.has_other_pages %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-end">
 
+                <!-- Previous -->
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                        &lsaquo; Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&lsaquo; Previous</span>
+                </li>
+                {% endif %}
 
-    </table>
+                <!-- Page Numbers -->
+                {% for num in page_obj.paginator.page_range %}
+                {% if num == page_obj.number %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    <!-- Next -->
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                            Next &rsaquo;
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next &rsaquo;</span>
+                    </li>
+                    {% endif %}
+
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
 </div>
 
 

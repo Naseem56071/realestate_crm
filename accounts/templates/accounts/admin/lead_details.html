@@ -1,10 +1,17 @@
 {% extends 'accounts/base.html' %}
 {% load tz %}
+
 {% block title %}
 <title>lead details</title>
 {% endblock title %}
+
+{% block heading %}
+<h3 class="ps-2">Lead Details :</h3>
+{% endblock %}
+
 {% block content_start %}
 <!--leads progress-->
+<div class="container">
 <div class="row mt-4">
 
     <div class="col-md-4 col-lg-2 mt-3">
@@ -55,6 +62,7 @@
 
 
 </div>
+</div>
 
 <!-- end-->
 <!-- leads details -->
@@ -64,30 +72,47 @@
         <h3 class="">All leads Details:</h3>
         <div class="d-flex justify-content-between mb-1">
 
-            <form method="get" class="filters" action="{% url 'admin.lead_details.dashboard' %}">
+            <form method="GET" class="filters" action="{% url 'admin.lead_details.dashboard' %}">
                 <div class="d-flex align-items-center gap-2">
 
-                    <select name="date" class="form-select form-select-sm filter-select">
-                        <option value="#" disabled {% if not date_filter %}selected{% endif %}>
-                            Choose date
-                        </option>
-                        <option value="all-dates" {% if date_filter == 'all-dates' %}selected{% endif %}>
-                            All Dates
-                        </option>
-                        <option value="today" {% if date_filter == 'today' %}selected{% endif %}>
-                            Today
-                        </option>
-                        <option value="yesterday" {% if date_filter == 'yesterday' %}selected{% endif %}>
-                            Yesterday
-                        </option>
-                        <option value="this-week" {% if date_filter == 'this-week' %}selected{% endif %}>
-                            This Week
-                        </option>
-                    </select>
+                    <form method="get" class="row g-2 mb-3">
 
-                    <button type="submit" class="btn btn-sm btn-primary">
-                        Apply
-                    </button>
+                        <!-- DATE -->
+                        <select name="date" class="form-select form-select-sm">
+                            <option value="">All Dates</option>
+                            <option value="today" {% if request.GET.date == "today" %}selected{% endif %}>Today</option>
+                            <option value="yesterday" {% if request.GET.date == "yesterday" %}selected{% endif %}>
+                                Yesterday</option>
+                            <option value="this-week" {% if request.GET.date == "this-week" %}selected{% endif %}>This
+                                Week</option>
+                        </select>
+
+                        <!-- AGENT -->
+                        <select name="agent" class="form-select form-select-sm">
+                            <option value="">Choose Agent</option>
+                            {% for agent in agents %}
+                            <option value="{{ agent.id }}" {% if request.GET.agent == agent.id %}selected{% endif %}>
+                                {{ agent.email }}
+                            </option>
+                            {% endfor %}
+                        </select>
+
+                        <!-- ASSOCIATE -->
+                        <select name="associate" class="form-select form-select-sm">
+                            <option value="">Choose Associate</option>
+                            {% for associate in associates %}
+                            <option value="{{ associate.id }}" {% if request.GET.associate == associate.id %}selected{% endif %}>
+                                {{ associate.email|default:associate.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+
+                        <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+
+                    </form>
+
+
+
                 </div>
             </form>
 
@@ -98,7 +123,7 @@
 
             <thead class="table-dark">
                 <tr>
-                    <th>S.NO</th>
+                    <th>S.No</th>
                     <th>Customer Name</th>
                     <th>Customer email</th>
                     <th>Customer Phone No</th>
@@ -111,7 +136,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for lead in leads %}
+                {% for lead in page_obj %}
 
                 <tr>
                     <td>{{ forloop.counter }}</td>
@@ -120,14 +145,14 @@
                     <td>{{ lead.phone }}</td>
                     <td>
                         {% if lead.agent %}
-                        {{ lead.agent.name }}
+                        <strong>{{ lead.agent.name|capfirst }}</strong>
                         {% else %}
                         not assigned
                         {% endif %}
                     </td>
                     <td>
                         {% if lead.associate %}
-                        {{ lead.associate.name }}
+                        <strong>{{ lead.associate.name|capfirst }}</strong>
                         {% else %}
                         Not assigned yet
                         {% endif %}
@@ -149,13 +174,16 @@
 
                     <td class="">
                         <div class="d-flex justify-content-center align-items-center">
-                            <!-- <a href="#" class="btn btn-sm btn-outline-primary me-1" title="Edit lead">
-                                <i class="bi bi-pencil-square"></i>
-                            </a> -->
+                            {% if lead.associate and lead.agent %}
+                            <a href="{% url 'associate.tracking.history' lead.associate.id lead.id %}"
+                                class="btn lead-abtnss btn-sm btn-outline-primary  me-1" title="view lead details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% endif %}
 
-                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
-                                data-bs-target="#deleteModal{{ lead.id }}">
-                                <i class="bi bi-trash3"></i>
+                            <button type="button" class="btn btn-sm lead-abtnss btn-outline-danger"
+                                data-bs-toggle="modal" data-bs-target="#deleteModal{{ lead.id }}">
+                                <i class="bi bi-trash3 "></i>
                             </button>
                             <div class="modal fade" id="deleteModal{{ lead.id }}" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered">
@@ -204,6 +232,53 @@
             </tbody>
 
         </table>
+
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-end">
+
+                <!-- Previous -->
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                        &lsaquo; Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&lsaquo; Previous</span>
+                </li>
+                {% endif %}
+
+                <!-- Page Numbers -->
+                {% for num in page_obj.paginator.page_range %}
+                {% if num == page_obj.number %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    <!-- Next -->
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                            Next &rsaquo;
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next &rsaquo;</span>
+                    </li>
+                    {% endif %}
+
+            </ul>
+        </nav>
+        {% endif %}
+
     </div>
 </div>
 <!-- end -->

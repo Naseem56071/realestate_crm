@@ -7,7 +7,7 @@
 
 {% block content_start %}
 
-<form method="POST" enctype="multipart/form-data">
+<form method="POST" action="{% url 'admin.add_products.dashboard' %}" enctype="multipart/form-data">
     {% csrf_token %}
 
     <div class="mb-3">
@@ -24,14 +24,33 @@
         <label><strong>Description :</strong></label>
         <textarea name="description" class="form-control"></textarea>
     </div>
+    <div class="mb-3">
+        <label class="form-label"><Strong>Location :</Strong></label>
+        <select class="form-select" name="location" required>
+            <option value="" selected disabled>Select Role</option>
+            <option value="hyderabad">Hyderabad</option>
+            <option value="bangalore">Bangalore</option>
+            <option value="chennai">Chennai</option>
+        </select>
+    </div>
 
     <div class="mb-3">
         <label><strong>Product Image :</strong></label>
         <input type="file" name="p_image" class="form-control">
     </div>
-   
+    <div class="d-flex justify-content-between mt-3">
+        <div>
 
-    <button class="btn btn-primary">Add Product</button>
+            <button type="submit" class="btn btn-primary">Add Product</button>
+            <button type="reset" class="btn btn-secondary ms-3">Reset</button>
+        </div>
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-success">
+                <a href="{% url 'admin.list_products.dashboard' %}" class="text-decoration-none text-white">Back</a>
+            </button>
+        </div>
+    </div>
+
 </form>
 
 {% endblock %}

@@ -140,3 +140,7 @@ body {
     margin-left: 216px;
   }
 }
+
+.contact-search-input{
+  border: 1px solid black;
+}

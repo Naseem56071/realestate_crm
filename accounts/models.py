@@ -47,6 +47,16 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
+    class Meta:
+        permissions = [
+            ("can_view_dashboard", "Can view dashboard"),
+            ("can_view_admin", "Can view admin section"),
+            ("can_view_products", "Can view products"),
+            ("can_view_leads", "Can view leads"),
+            ("can_view_permissions", "Can view permissions"),
+            ("can_view_contacts", "Can view contacts"),
+        ]
+
     def __str__(self):
         return self.email
 class OTP(models.Model):
@@ -64,17 +74,20 @@ class Task(models.Model):
         ("in_progress", "In Progress"),
         ("completed", "Completed"),
     ]
+
     INTEREST_LEVEL_CHOICES = [
         ("low", "Low"),
         ("medium", "Medium"),
         ("high", "High"),
     ]
+
     PURCHASE_TIMELINE_CHOICES = [
         ("immediate", "Immediate"),
         ("1-3", "1–3 Months"),
         ("3-6", "3–6 Months"),
         ("enquiry", "Just Enquiry"),
     ]
+
     PROPERTY_TYPE_CHOICES = [
         ("plot", "Plot"),
         ("flat", "Flat"),
@@ -97,9 +110,10 @@ class Task(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name="associate_tasks",
-        null=True,   # allow NULL in database
-        blank=True   # allow empty in forms
+        null=True, # allow NULL in database
+        blank=True # allow empty in forms
     )
+
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default="new")
 
@@ -226,12 +240,19 @@ class TaskHistory(models.Model):
 
 
 class Properties(models.Model):
+    CITY_CHOICES = [
+        ('hyderabad', 'Hyderabad'),
+        ('bangalore', 'Bangalore'),
+        ('chennai', 'Chennai'),
+    ]
+
+    location = models.CharField(max_length=50, choices=CITY_CHOICES,default=None)
     name = models.CharField(max_length=200)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
-    image = models.ImageField(upload_to='products/', blank=True, null=True)
+    image = models.ImageField(upload_to='products/', blank=True, null=True) 
 
     def __str__(self):
         return self.name

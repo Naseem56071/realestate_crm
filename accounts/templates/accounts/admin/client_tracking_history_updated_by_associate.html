@@ -1,0 +1,167 @@
+{% extends 'accounts/base.html' %}
+{% block title%}
+<title>clent tracking history </title>
+{% endblock title %}
+{% block heading %}
+
+{% endblock %}
+
+{% block content_start %}
+
+
+<div class="container mt-2">
+    <div class="d-flex justify-content-between">
+        <h3>Client Info:  </h3>
+    {% if request.user.role == 'admin' %}
+    <button class="btn btn-success ">
+        <a href="{% url 'admin.lead_details.dashboard' %}" class="text-decoration-none text-white">Back</a>
+    </button>
+    {% elif request.user.role == 'agent' %}
+    <button class="btn btn-success ">
+        <a href="{% url 'agent.view.dashboard' %}" class="text-decoration-none text-white">Back</a>
+    </button>
+    {% elif request.user.role == 'associate' %}
+    <button class="btn btn-success ">
+        <a href="{% url 'associatetask.dashboard' %}" class="text-decoration-none text-white">Back</a>
+    </button>
+    {% endif %}
+    </div>
+    <div class="table-responsive">
+
+       {% if task_details %}
+
+<h4 class="mb-4">
+    Client Name :
+    <span class="text-primary">{{ task_details.name|capfirst }}</span>
+</h4>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+
+        <div class="row g-4">
+
+            <!-- Client Info -->
+            <div class="col-md-6">
+                <h6 class="text-muted">Client Information</h6>
+                <hr>
+                <p><strong>Name:</strong> {{ task_details.name|capfirst }}</p>
+                <p><strong>Phone:</strong> {{ task_details.phone }}</p>
+                <p><strong>Email:</strong> {{ task_details.email }}</p>
+            </div>
+
+            <!-- Task Info -->
+            <div class="col-md-6">
+                <h6 class="text-muted">Task Information</h6>
+                <hr>
+                <p><strong>Description:</strong> {{ task_details.description|title }}</p>
+                <p><strong>Created At:</strong>
+                    {{ task_details.created_at|date:"d M Y h:i A" }}
+                </p>
+                <p><strong>Assigned At:</strong>
+                    {{ task_details.assigned_at|date:"d M Y h:i A" }}
+                </p>
+            </div>
+
+            <!-- Assignment Info -->
+            <div class="col-md-12">
+                <h6 class="text-muted mt-3">Assignment Details</h6>
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Assigned By (Agent):</strong><br>
+                            {% if task_details.agent %}
+                                <span class="badge bg-primary">
+                                    {{ task_details.agent.email }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">Not assigned</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="col-md-6">
+                        <p><strong>Assigned To (Associate):</strong><br>
+                            {% if task_details.associate %}
+                                <span class="badge bg-success">
+                                    {{ task_details.associate.email }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">Not assigned</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% else %}
+<p class="text-muted">No client details found.</p>
+{% endif %}
+
+
+    </div>
+</div>
+
+
+<!--associate update tracing history-->
+<div class="container mt-5">
+
+    <div class="table-responsive">
+        {% if last_updated_by %}
+        <h3>Updated by associate: <span class="text-primary">{{ last_updated_by.email }}</span> </h3>
+        {% endif %}
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>S.No</th>
+                    <th>Updated By</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>client_response</th>
+                    <th>Updated At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in history %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+
+                    <td>{{ h.updated_by.name|capfirst }}</td>
+
+                    <td>
+                       <strong>{{ h.updated_by.role|capfirst }}</strong>
+                    </td>
+
+                    <td>
+                        {% if h.task.status == 'pending' %}
+                        <span class="badge bg-warning text-dark">Pending</span>
+                        {% elif h.task.status == 'in_progress' %}
+                         <span class="badge bg-info text-dark">In Progress</span>
+                        {% elif h.task.status == 'completed' %}
+                          <span class="badge bg-success">Completed</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ h.task.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ h.client_response }}</td>
+                    <td>{{ h.updated_at|date:"d M Y, h:i A" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        No tracking history found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+{% endblock %}

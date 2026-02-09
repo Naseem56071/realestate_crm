@@ -24,6 +24,15 @@
         <label><strong>Description :</strong></label>
         <textarea name="description" class="form-control">{{ product.description }}</textarea>
     </div>
+     <div class="mb-3">
+        <label class="form-label"><Strong>Location :</Strong></label>
+        <select class="form-select" name="location">
+            <option value="" selected disabled>Select Role</option>
+            <option value="hyderabad">Hyderabad</option>
+            <option value="bangalore">Bangalore</option>
+            <option value="chennai">Chennai</option>
+        </select>
+    </div>
     {% if product.image %}
     <div class="mb-3">
         <label><strong>Current Product Image :</strong></label><br>

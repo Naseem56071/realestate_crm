@@ -13,6 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 from accounts.models import User, Task, TaskHistory, Properties, OTP
 from accounts.decorators import role_required
 from accounts.utils import send_sms, generate_otp
+from django.core.paginator import Paginator
 
 
 def contact_us(request):
@@ -183,60 +184,72 @@ def verify_otp_view(request):
 @login_required
 @role_required(["admin"])
 def assign_permissions(request):
+    # Only admin can access
     if request.user.role != "admin":
         return HttpResponse("You don't have permission", status=403)
-    # load users(agents and asscoaites)
+
     users = User.objects.filter(role__in=["agent", "associate"])
-    # initial variables
     selected_user = None
     user_permissions = []
 
-    # Get ContentType for Task model
-    content_type = ContentType.objects.get_for_model(Task)
+    # ContentTypes
+    task_ct = ContentType.objects.get_for_model(Task)
+    user_ct = ContentType.objects.get_for_model(User)
 
-    # Get user_id from GET when user selects a user
+    # 🔹 PERMISSION DEFINITIONS (THIS WAS MISSING)
+    task_permissions = [
+        ("can_assign_task", "Assign Task"),
+        ("can_update_task", "Update Task"),
+        ("can_view_all_tasks", "View All Tasks"),
+        ("can_delete_task", "Delete Task"),
+    ]
+
+    navigation_permissions = [
+        ("can_view_dashboard", "Dashboard"),
+        ("can_view_admin", "Admin"),
+        ("can_view_products", "Products"),
+        ("can_view_leads", "Leads"),
+        ("can_view_permissions", "Permissions"),
+        ("can_view_contacts", "Contacts"),
+    ]
+
+    #  GET 
     user_id = request.GET.get("user_id")
     if user_id:
         selected_user = get_object_or_404(User, id=user_id)
+        user_permissions = selected_user.user_permissions.values_list(
+            "codename", flat=True
+        )
 
-        # Load assigned permissions for this user
-        user_permissions = selected_user.user_permissions.filter(
-            content_type=content_type
-        ).values_list("codename", flat=True)
-
+    # ---------------- POST ----------------
     if request.method == "POST":
         user_id = request.POST.get("user_id")
         permission_codes = request.POST.getlist("permissions")
         selected_user = get_object_or_404(User, id=user_id)
 
-        # Remove old task permissions
-        old_perms = selected_user.user_permissions.filter(
-            content_type=content_type
-        )
+        # REMOVE RELATIONS (NOT DELETE)
+        selected_user.user_permissions.clear()
 
-        for perm in old_perms:
-            selected_user.user_permissions.remove(perm)
-
-        # Add new permissions
+        # ADD PERMISSIONS BACK
         for code in permission_codes:
-            permission = Permission.objects.get(
-                codename=code,
-                content_type=content_type
-            )
-            selected_user.user_permissions.add(permission)
+            perm = Permission.objects.filter(codename=code).first()
+            if perm:
+                selected_user.user_permissions.add(perm)
 
-        # Reload user_permissions for rendering
-        user_permissions = selected_user.user_permissions.filter(
-            content_type=content_type
-        ).values_list("codename", flat=True)
-        messages.success(request, "added permissions")
-        return redirect("assign_permissions")
+        messages.success(request, "Permissions updated successfully")
+        return redirect(f"{request.path}?user_id={selected_user.id}")
 
-    return render(request, "accounts/admin/assign_permissions.html", {
-        "users": users,
-        "selected_user": selected_user,
-        "user_permissions": user_permissions,
-    })
+    return render(
+        request,
+        "accounts/admin/assign_permissions.html",
+        {
+            "users": users,
+            "selected_user": selected_user,
+            "user_permissions": user_permissions,
+            "task_permissions": task_permissions,
+            "navigation_permissions": navigation_permissions,
+        }
+    )
 
 
 @login_required
@@ -252,7 +265,15 @@ def logout_view(request):
 @role_required(['admin'])
 def contact_details(request):
     tasks = Task.objects.all()
-    return render(request, "accounts/admin/contact_details.html", {'tasks': tasks})
+    query = request.GET.get('name')
+    if query:
+        query = query.lower()
+        tasks = tasks.filter(name__icontains=query)
+    paginator = Paginator(tasks, 1)  # show 5 records per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "accounts/admin/contact_details.html", {"page_obj": page_obj})
 
 
 @login_required
@@ -310,12 +331,17 @@ def admin_dashboard_view(request):
     tasks = Task.objects.all().select_related('agent', 'associate')
     histories = TaskHistory.objects.filter(
         task__in=tasks).order_by('task', 'updated_at')
-    users = User.objects.all()
+    users  = User.objects.filter(role__in=["agent", "associate"])
     total_users = User.objects.count()
     total_agents = User.objects.filter(role="agent").count()
     total_associates = User.objects.filter(role='associate').count()
+
+    paginator = Paginator(users, 1)  # show 5 records per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'accounts/admin/admin_dashboard.html', {
-        'users': users,
+        'page_obj': page_obj,
         "tasks": tasks,
         "histories": histories,
         "total_users": total_users,
@@ -343,6 +369,8 @@ def list_lead_details(request):
     start_of_week = today - timedelta(days=7)
 
     date_filter = request.GET.get("date")
+    agent_id = request.GET.get("agent")
+    associate_id = request.GET.get("associate")
 
     if date_filter == "today":
         start = timezone.make_aware(datetime.combine(today, time.min))
@@ -358,8 +386,16 @@ def list_lead_details(request):
         start = timezone.make_aware(datetime.combine(start_of_week, time.min))
         end = timezone.make_aware(datetime.combine(today, time.max))
         leads = leads.filter(created_at__range=(start, end))
-    else:
-        leads = Task.objects.all()
+
+    if agent_id:
+        leads = leads.filter(agent_id=agent_id)
+    if associate_id:
+        leads = leads.filter(associate_id=associate_id)
+
+    paginator = Paginator(leads.order_by("-created_at"),
+                          1)  # show 5 records per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
 
     total_leads = leads.count()
     pending_leads = leads.filter(status="pending").count()
@@ -367,12 +403,17 @@ def list_lead_details(request):
     in_progress_lead = leads.filter(status="in_progress").count()
     completed_leads = leads.filter(status="completed").count()
 
+    agents = User.objects.filter(role='agent')
+    associates = User.objects.filter(role='associate')
+
     return render(
         request,
         "accounts/admin/lead_details.html",
         {
-            "leads": leads,
+            "page_obj": page_obj,
             "date_filter": date_filter,
+            "agents": agents,
+            "associates": associates,
             "total_leads": total_leads,
             "pending_leads": pending_leads,
             "new_leads": new_leads,
@@ -382,6 +423,8 @@ def list_lead_details(request):
     )
 
 
+@login_required
+@role_required(['admin'])
 def create_lead(request):
     if request.method == "POST":
         name = request.POST.get("name")
@@ -514,7 +557,7 @@ def agent_dashboard(request):
 @login_required
 @role_required(["agent"])
 def agent_dashboard_view(request):
-    users = User.objects.all()
+    users = User.objects.filter(role="associate")
     return render(request, "accounts/agent/agent_dashboard_view.html", {'users': users})
 
 
@@ -614,7 +657,7 @@ def associate_dashboard(request):
 
 
 @login_required
-@role_required(["associate", "admin", "agent"])
+@role_required(["associate"])
 def associate_tracking_updates(request):
     tasks = Task.objects.all().select_related('agent', 'associate')
     if request.user.role == "associate":
@@ -632,11 +675,25 @@ def associate_tracking_updates(request):
 
 
 @login_required
+@role_required(['admin','agent','associate'])
+def client_tracking_history(request, associate_id, task_id):
+    history = (
+        TaskHistory.objects.filter(task_id=task_id, updated_by_id=associate_id).select_related(
+            "updated_by", "task").order_by("-updated_at")
+    )
+    task_details = task_details = get_object_or_404(Task, id=task_id)
+    last_updated_by = history.first().updated_by if history.exists() else None
+    return render(request, 'accounts/admin/client_tracking_history_updated_by_associate.html', {"history": history, 'last_updated_by': last_updated_by, "task_details": task_details})
+
+
+@login_required
 @role_required(["agent"])
 def agent_view_task(request):
     leads = Task.objects.filter(agent=request.user)
-
-    return render(request, "accounts/agent/view_lead.html", {"leads": leads})
+    paginator = Paginator(leads, 1)  # show 5 records per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, "accounts/agent/view_lead.html", {"page_obj": page_obj})
 
 
 @login_required
@@ -718,7 +775,11 @@ def delete_task(request, id):
 @role_required(["associate"])
 def associate_view_task(request):
     tasks = Task.objects.filter(associate=request.user)
-    return render(request, "accounts/associate/view_task.html", {"tasks": tasks})
+
+    paginator = Paginator(tasks, 2)  # show 5 records per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, "accounts/associate/view_task.html", {"page_obj": page_obj})
 
 
 @login_required
@@ -759,16 +820,18 @@ def add_products(request):
         product_price = request.POST.get('price')
         product_description = request.POST.get('description')
         product_img = request.FILES.get("p_image")
+        p_location = request.POST.get('location')
 
         Properties.objects.create(
             name=product_name,
             price=product_price,
             description=product_description,
             created_at=created_at,
-            image=product_img
+            image=product_img,
+            location=p_location
         )
         messages.success(request, "Product added Successfully")
-        return redirect('dashboard')
+        return redirect('admin.list_products.dashboard')
     return render(request, 'accounts/products/add_products.html')
 
 
@@ -776,7 +839,16 @@ def add_products(request):
 @role_required(['admin'])
 def list_products(request):
     products = Properties.objects.all()
-    return render(request, "accounts/products/view_products.html", {'products': products})
+    query = request.GET.get('location')
+    if query:
+        query = query.lower()
+        products = products.filter(location=query)
+
+    paginator = Paginator(products, 2)  # show 5 records per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "accounts/products/view_products.html", {'page_obj': page_obj})
 
 
 @login_required
@@ -788,12 +860,15 @@ def update_product(request, id):
         price = request.POST.get('price')
         description = request.POST.get('description')
         p_image = request.FILES.get('p_image')
+        p_location = request.POST.get('location')
+
         updated_at = timezone.now()
 
         product.name = P_name
         product.price = price
         product.description = description
         product.updated_at = updated_at
+        product.location = p_location
 
         if p_image:
             product.image = p_image
