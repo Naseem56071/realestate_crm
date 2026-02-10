@@ -213,7 +213,7 @@ def assign_permissions(request):
         ("can_view_contacts", "Contacts"),
     ]
 
-    #  GET 
+    # GET 
     user_id = request.GET.get("user_id")
     if user_id:
         selected_user = get_object_or_404(User, id=user_id)
@@ -221,7 +221,7 @@ def assign_permissions(request):
             "codename", flat=True
         )
 
-    # ---------------- POST ----------------
+    # POST 
     if request.method == "POST":
         user_id = request.POST.get("user_id")
         permission_codes = request.POST.getlist("permissions")
@@ -480,8 +480,9 @@ def admin_create_agent(request):
         name = request.POST.get("name", "").strip()
         email = request.POST.get("email", "").strip()
         role = request.POST.get("role")
-        password = request.POST.get("password")
-        confirm_password = request.POST.get("confirm-password")
+        phone=request.POST.get('phone').strip()
+        password = request.POST.get("password").strip()
+        confirm_password = request.POST.get("confirm-password").strip()
 
         # Name validation
         if not name:
@@ -495,6 +496,11 @@ def admin_create_agent(request):
         if not name.replace(" ", "").isalpha():
             messages.error(request, "Name must contain only letters")
             return redirect("dashboard")
+        # phone number validation
+        if len(phone) !=10:
+             messages.error(request, "Phone Number must contaion 10 digits")
+             return redirect('dashboard')
+
 
         # Password match
         if password != confirm_password:
@@ -539,6 +545,7 @@ def admin_create_agent(request):
             email=email,
             name=name,
             password=password,
+            phone=phone,
             role=role,
         )
 
@@ -581,6 +588,7 @@ def agent_create_associate(request):
         name = request.POST.get("name", "").strip()
         email = request.POST.get("email", "").strip()
         role = request.POST.get("role", "").strip()
+        phone=request.POST.get('phone',"").strip()
         password = request.POST.get("password", "").strip()
         confirm_password = request.POST.get("confirm-password", "").strip()
 
@@ -596,6 +604,11 @@ def agent_create_associate(request):
         if not name.replace(" ", "").isalpha():
             messages.error(request, "Name must contain only letters")
             return redirect("agent.dashboard")
+        
+        if len(phone) !=10:
+            messages.error(request, "Phone Number must contaion 10 digits")
+            return redirect('agent.dashboard')
+
 
         # Password match
         if password != confirm_password:
@@ -640,6 +653,7 @@ def agent_create_associate(request):
             email=email,
             name=name,
             password=password,
+            phone=phone,
             role=role,
         )
         associate.created_by = request.user   # agent
