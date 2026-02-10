@@ -27,10 +27,10 @@
      <div class="mb-3">
         <label class="form-label"><Strong>Location :</Strong></label>
         <select class="form-select" name="location">
-            <option value="" selected disabled>Select Role</option>
-            <option value="hyderabad">Hyderabad</option>
-            <option value="bangalore">Bangalore</option>
-            <option value="chennai">Chennai</option>
+            <option value="" disabled  {% if not product.location %}selected{% endif %}>Select Role</option>
+            <option value="hyderabad" {% if product.location == 'hyderabad' %}selected{% endif %}>Hyderabad</option>
+            <option value="bangalore" {% if product.location == 'bangalore' %}selected{% endif %}>Bangalore</option>
+            <option value="chennai" {% if product.location == 'chennai' %}selected{% endif %}>Chennai</option>
         </select>
     </div>
     {% if product.image %}
@@ -45,8 +45,10 @@
         <input type="file" name="p_image" class="form-control">
     </div>
 
-
+<div class="d-flex justify-content-between">
     <button class="btn btn-primary">Update Product</button>
+    <button class="btn btn-success"><a class="text-decoration-none text-white" href="{% url 'admin.list_products.dashboard' %}">Back</a></button>
+    </div>
 </form>
 
 {% endblock %}

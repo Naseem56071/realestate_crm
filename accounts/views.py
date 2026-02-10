@@ -196,7 +196,7 @@ def assign_permissions(request):
     task_ct = ContentType.objects.get_for_model(Task)
     user_ct = ContentType.objects.get_for_model(User)
 
-    # 🔹 PERMISSION DEFINITIONS (THIS WAS MISSING)
+    #  PERMISSION DEFINITIONS (THIS WAS MISSING)
     task_permissions = [
         ("can_assign_task", "Assign Task"),
         ("can_update_task", "Update Task"),
@@ -220,12 +220,14 @@ def assign_permissions(request):
         user_permissions = selected_user.user_permissions.values_list(
             "codename", flat=True
         )
+        print(user_permissions)
 
     # POST 
     if request.method == "POST":
         user_id = request.POST.get("user_id")
         permission_codes = request.POST.getlist("permissions")
         selected_user = get_object_or_404(User, id=user_id)
+        print(selected_user)
 
         # REMOVE RELATIONS (NOT DELETE)
         selected_user.user_permissions.clear()
@@ -324,6 +326,12 @@ def dashboard(request):
 
     )
 
+@login_required
+def upload_profile_image(request):
+    if request.method == "POST" and request.FILES.get("profile_image"):
+        request.user.profile_image = request.FILES["profile_image"]
+        request.user.save()
+    return redirect(request.META.get("HTTP_REFERER", "/"))
 
 @login_required
 @role_required(['admin'])

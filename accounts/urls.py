@@ -20,6 +20,9 @@ urlpatterns = [
 
     path("logout/", views.logout_view, name="logout"),
 
+    path("profile/upload-image/", views.upload_profile_image, name="upload_profile_image"),
+
+
     path("dashboard/", views.dashboard, name="dashboard"),
 
     path(

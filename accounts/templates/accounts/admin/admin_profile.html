@@ -1,0 +1,37 @@
+{% extends "accounts/base.html" %}
+
+{% block title%}
+<title>admin profile</title>
+{% endblock %}
+{% block heading %}
+<h3>My Profile</h3>
+{% endblock %}
+
+{% block content_start %}
+<div class="card shadow-sm" style="max-width: 600px;">
+    <div class="card-body">
+        <table class="table table-borderless">
+            <tr>
+                <th>Name</th>
+                <td>{{ user_obj.get_full_name|default:user_obj.username }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ user_obj.email }}</td>
+            </tr>
+            <tr>
+                <th>Role</th>
+                <td class="text-capitalize">{{ user_obj.role }}</td>
+            </tr>
+            <tr>
+                <th>Phone</th>
+                <td>{{ user_obj.phone|default:"—" }}</td>
+            </tr>
+            <tr>
+                <th>Joined On</th>
+                <td>{{ user_obj.date_joined|date:"d M Y" }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+{% endblock %}

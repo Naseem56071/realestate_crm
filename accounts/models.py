@@ -23,7 +23,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
         help_text="Enter 10 digit mobile number"
     )
-    
+
     created_by = models.ForeignKey(
         "self",
         null=True,
@@ -32,11 +32,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         related_name="created_associates"
     )
 
+
     profile_image = models.ImageField(
-        upload_to="users/profile/",
-        null=True,
-        blank=True,
-        default="users/profile/default.png",
+    upload_to="profile_images/",
+    blank=True,
+    null=True,
+    default=None   # IMPORTANT
     )
 
     is_active = models.BooleanField(default=True)
@@ -59,6 +60,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
 class OTP(models.Model):
     phone = models.CharField(max_length=10)
     otp = models.CharField(max_length=6)
@@ -66,6 +69,7 @@ class OTP(models.Model):
 
     def is_expired(self):
         return timezone.now() > self.created_at + timezone.timedelta(minutes=5)
+
 
 class Task(models.Model):
 
@@ -94,7 +98,7 @@ class Task(models.Model):
         ("villa", "Villa"),
         ("commercial", "Commercial"),
     ]
-    
+
     name = models.CharField(max_length=100)
     email = models.EmailField(blank=True, default="")
     phone = models.CharField(max_length=20, default="")
@@ -110,8 +114,8 @@ class Task(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name="associate_tasks",
-        null=True, # allow NULL in database
-        blank=True # allow empty in forms
+        null=True,  # allow NULL in database
+        blank=True  # allow empty in forms
     )
 
     status = models.CharField(
@@ -187,7 +191,7 @@ class Task(models.Model):
             ("can_assign_task", "Can assign task"),
             ("can_update_task", "Can update task"),
             ("can_view_all_tasks", "Can view all tasks"),
-            ("can_delete_task","Can delete tasks"),
+            ("can_delete_task", "Can delete tasks"),
         ]
 
 
@@ -246,13 +250,14 @@ class Properties(models.Model):
         ('chennai', 'Chennai'),
     ]
 
-    location = models.CharField(max_length=50, choices=CITY_CHOICES,default=None)
+    location = models.CharField(
+        max_length=50, choices=CITY_CHOICES, default=None)
     name = models.CharField(max_length=200)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at=models.DateTimeField(auto_now=True)
-    image = models.ImageField(upload_to='products/', blank=True, null=True) 
+    updated_at = models.DateTimeField(auto_now=True)
+    image = models.ImageField(upload_to='products/', blank=True, null=True)
 
     def __str__(self):
         return self.name
