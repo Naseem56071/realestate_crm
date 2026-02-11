@@ -3,20 +3,20 @@
 {% block title %}
 <title>Admin Permissions Dashboard</title>
 {% endblock title %}
+
 {% block heading %}
 <h3 class="ps-2">Permissions :</h3>
-{% endblock  %}
-{% block content_start %}
+{% endblock %}
 
+{% block content_start %}
 <div class="container mt-4">
 
-    <!-- Page Heading -->
     <div class="mb-4">
         <h4 class="fw-bold">Assign Permissions</h4>
         <p class="text-muted mb-0">Enable or disable access for agents and associates</p>
     </div>
 
-    <!-- USER SELECTION (GET FORM) -->
+    <!-- USER SELECTION -->
     <form method="GET">
         <div class="row mb-4">
             <div class="col-md-6">
@@ -34,56 +34,94 @@
     </form>
 
     {% if selected_user %}
-    <!-- PERMISSIONS FORM (POST) -->
     <form method="POST">
         {% csrf_token %}
         <input type="hidden" name="user_id" value="{{ selected_user.id }}">
 
-        <!-- Task Permissions -->
-        <div class="mb-3">
-           
-            <div class="row g-3">
-                <h6 class="fw-bold mb-3">Task Related Permissions</h6>
+        <div class="accordion" id="permissionAccordion">
 
-                {% for code, label in task_permissions %}
-                <div class="col-md-3">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="permissions" value="{{ code }}"
-                                    id="{{ code }}" {% if code in user_permissions %}checked{% endif %}>
-                                <label class="form-check-label fw-semibold" for="{{ code }}">
-                                    {{ label }}
-                                </label>
+          
+
+            <!-- PRODUCTS -->
+            <div class="accordion-item mt-3">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#productsPerm">
+                        <strong>Product Permissions</strong>
+                    </button>
+                </h2>
+                <div id="productsPerm" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <div class="row">
+                            {% for code, label in product_permissions %}
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissions" value="{{ code }}" {% if code in user_permissions %}checked{% endif %}>
+                                    <label class="form-check-label">
+                                        {{ label }}
+                                    </label>
+                                </div>
                             </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
-                {% endfor %}
-
-                <h6 class="fw-bold mb-2">Other  Permissions</h6>
-
-                {% for code, label in navigation_permissions %}
-                <div class="col-md-3">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="permissions" value="{{ code }}"
-                                    id="{{ code }}" {% if code in user_permissions %}checked{% endif %}>
-                                <label class="form-check-label fw-semibold" for="{{ code }}">
-                                    {{ label }}
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-
-
             </div>
+
+            <!-- TASKS -->
+            <div class="accordion-item mt-3">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#tasksPerm">
+                        <STrong>Leads Permissions</STrong>
+                    </button>
+                </h2>
+                <div id="tasksPerm" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <div class="row">
+                            {% for code, label in task_permissions %}
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissions" value="{{ code }}" {% if code in user_permissions %}checked{% endif %}>
+                                    <label class="form-check-label">
+                                        {{ label }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="accordion-item mt-3">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navPerm">
+                        <strong>Navigation Permissions</strong> 
+                    </button>
+                </h2>
+                <div id="navPerm" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <div class="row">
+                            {% for code, label in navigation_permissions %}
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissions" value="{{ code }}" {% if code in user_permissions %}checked{% endif %}>
+                                    <label class="form-check-label">
+                                        {{ label }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <!-- Save Button -->
         <div class="mt-4">
             <button type="submit" class="btn btn-primary px-4">
                 Save Permissions
@@ -93,5 +131,4 @@
     {% endif %}
 
 </div>
-
 {% endblock %}

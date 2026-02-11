@@ -1,5 +1,5 @@
 import re
-from django.db.models import Count
+from django.db.models import Count,Q
 from django.utils import timezone
 from datetime import timedelta, datetime, time
 from django.utils.dateparse import parse_datetime
@@ -14,7 +14,7 @@ from accounts.models import User, Task, TaskHistory, Properties, OTP
 from accounts.decorators import role_required
 from accounts.utils import send_sms, generate_otp
 from django.core.paginator import Paginator
-
+from django.contrib.auth.decorators import permission_required
 
 def contact_us(request):
     if request.method == "POST":
@@ -184,24 +184,24 @@ def verify_otp_view(request):
 @login_required
 @role_required(["admin"])
 def assign_permissions(request):
-    # Only admin can access
-    if request.user.role != "admin":
-        return HttpResponse("You don't have permission", status=403)
 
     users = User.objects.filter(role__in=["agent", "associate"])
     selected_user = None
     user_permissions = []
+    
 
-    # ContentTypes
-    task_ct = ContentType.objects.get_for_model(Task)
-    user_ct = ContentType.objects.get_for_model(User)
-
-    #  PERMISSION DEFINITIONS (THIS WAS MISSING)
     task_permissions = [
-        ("can_assign_task", "Assign Task"),
-        ("can_update_task", "Update Task"),
-        ("can_view_all_tasks", "View All Tasks"),
-        ("can_delete_task", "Delete Task"),
+        ("can_view_lead", "View Lead"),
+        ("can_assign_lead", "Assign Lead"),
+        ("can_update_lead", "Update Lead"),
+        ("can_delete_lead", "Delete Lead"),
+    ]
+
+    product_permissions = [
+        ("view_product", "View Products"),
+        ("add_product", "Add Products"),
+        ("change_product", "Update Products"),
+        ("delete_product", "Delete Products"),
     ]
 
     navigation_permissions = [
@@ -213,26 +213,22 @@ def assign_permissions(request):
         ("can_view_contacts", "Contacts"),
     ]
 
-    # GET 
+    # GET
     user_id = request.GET.get("user_id")
     if user_id:
         selected_user = get_object_or_404(User, id=user_id)
         user_permissions = selected_user.user_permissions.values_list(
             "codename", flat=True
         )
-        print(user_permissions)
 
-    # POST 
+    # POST
     if request.method == "POST":
         user_id = request.POST.get("user_id")
         permission_codes = request.POST.getlist("permissions")
         selected_user = get_object_or_404(User, id=user_id)
-        print(selected_user)
 
-        # REMOVE RELATIONS (NOT DELETE)
         selected_user.user_permissions.clear()
 
-        # ADD PERMISSIONS BACK
         for code in permission_codes:
             perm = Permission.objects.filter(codename=code).first()
             if perm:
@@ -249,6 +245,7 @@ def assign_permissions(request):
             "selected_user": selected_user,
             "user_permissions": user_permissions,
             "task_permissions": task_permissions,
+            "product_permissions": product_permissions,
             "navigation_permissions": navigation_permissions,
         }
     )
@@ -326,6 +323,7 @@ def dashboard(request):
 
     )
 
+
 @login_required
 def upload_profile_image(request):
     if request.method == "POST" and request.FILES.get("profile_image"):
@@ -333,13 +331,21 @@ def upload_profile_image(request):
         request.user.save()
     return redirect(request.META.get("HTTP_REFERER", "/"))
 
+
 @login_required
 @role_required(['admin'])
 def admin_dashboard_view(request):
+    users = User.objects.filter(role__in=["agent", "associate"])
+    name = request.GET.get('name', '').strip()
+    role = request.GET.get('role', '').strip()
+    if name:
+        users = users.filter(Q(name__icontains=name) | Q(email__icontains=name))
+    if role:
+        users = users.filter(role=role)
+
     tasks = Task.objects.all().select_related('agent', 'associate')
     histories = TaskHistory.objects.filter(
         task__in=tasks).order_by('task', 'updated_at')
-    users  = User.objects.filter(role__in=["agent", "associate"])
     total_users = User.objects.count()
     total_agents = User.objects.filter(role="agent").count()
     total_associates = User.objects.filter(role='associate').count()
@@ -488,7 +494,7 @@ def admin_create_agent(request):
         name = request.POST.get("name", "").strip()
         email = request.POST.get("email", "").strip()
         role = request.POST.get("role")
-        phone=request.POST.get('phone').strip()
+        phone = request.POST.get('phone').strip()
         password = request.POST.get("password").strip()
         confirm_password = request.POST.get("confirm-password").strip()
 
@@ -505,10 +511,9 @@ def admin_create_agent(request):
             messages.error(request, "Name must contain only letters")
             return redirect("dashboard")
         # phone number validation
-        if len(phone) !=10:
-             messages.error(request, "Phone Number must contaion 10 digits")
-             return redirect('dashboard')
-
+        if len(phone) != 10:
+            messages.error(request, "Phone Number must contaion 10 digits")
+            return redirect('dashboard')
 
         # Password match
         if password != confirm_password:
@@ -596,7 +601,7 @@ def agent_create_associate(request):
         name = request.POST.get("name", "").strip()
         email = request.POST.get("email", "").strip()
         role = request.POST.get("role", "").strip()
-        phone=request.POST.get('phone',"").strip()
+        phone = request.POST.get('phone', "").strip()
         password = request.POST.get("password", "").strip()
         confirm_password = request.POST.get("confirm-password", "").strip()
 
@@ -612,11 +617,10 @@ def agent_create_associate(request):
         if not name.replace(" ", "").isalpha():
             messages.error(request, "Name must contain only letters")
             return redirect("agent.dashboard")
-        
-        if len(phone) !=10:
+
+        if len(phone) != 10:
             messages.error(request, "Phone Number must contaion 10 digits")
             return redirect('agent.dashboard')
-
 
         # Password match
         if password != confirm_password:
@@ -697,7 +701,7 @@ def associate_tracking_updates(request):
 
 
 @login_required
-@role_required(['admin','agent','associate'])
+@role_required(['admin', 'agent', 'associate'])
 def client_tracking_history(request, associate_id, task_id):
     history = (
         TaskHistory.objects.filter(task_id=task_id, updated_by_id=associate_id).select_related(
@@ -720,6 +724,7 @@ def agent_view_task(request):
 
 @login_required
 @role_required(["agent"])
+@permission_required('accounts.can_assign_lead',raise_exception=True)
 def agent_assign_task(request, name):
     associates = User.objects.filter(
         role="associate",
@@ -756,7 +761,7 @@ def agent_assign_task(request, name):
 @login_required
 @role_required(["agent"])
 def agent_update_task(request, id):
-    if not request.user.has_perm("accounts.can_update_task"):
+    if not request.user.has_perm("accounts.can_update_lead"):
         return HttpResponse("You can't update task", status=403)
 
     task = get_object_or_404(Task, id=id, agent=request.user)
@@ -858,8 +863,11 @@ def add_products(request):
 
 
 @login_required
-@role_required(['admin'])
+@role_required(['admin','agent'])
+@permission_required("accounts.view_product",raise_exception=True)
 def list_products(request):
+    if not request.user.has_perm("accounts.view_product"):
+        return HttpResponse("You dont have permissoin to view this page")
     products = Properties.objects.all()
     query = request.GET.get('location')
     if query:

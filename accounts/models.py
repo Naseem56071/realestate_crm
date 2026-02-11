@@ -188,10 +188,12 @@ class Task(models.Model):
 
     class Meta:
         permissions = [
-            ("can_assign_task", "Can assign task"),
-            ("can_update_task", "Can update task"),
-            ("can_view_all_tasks", "Can view all tasks"),
-            ("can_delete_task", "Can delete tasks"),
+            # EXISTING
+            ("can_assign_lead", "Can assign task"),
+            ("can_update_lead", "Can update task"),
+            ("can_view_lead", "Can view all tasks"),
+            ("can_delete_lead", "Can delete tasks"),
+
         ]
 
 
@@ -261,3 +263,10 @@ class Properties(models.Model):
 
     def __str__(self):
         return self.name
+    class Meta:
+        permissions  = [
+            ("view_product", "View Products"),
+            ("add_product", "Add Products"),
+            ("change_product", "Update Products"),
+            ("delete_product", "Delete Products"),
+            ]

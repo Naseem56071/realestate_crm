@@ -46,7 +46,8 @@
         </div>
 
         <!-- Buttons -->
-        <div class="submit_reset">
+        <div class="submit_reset d-flex justify-content-between">
+            <div class="">
             <button type="submit" class="btn btn-primary">
                 Update Task
             </button>
@@ -54,6 +55,12 @@
             <button type="reset" class="btn btn-secondary ms-2">
                 Reset
             </button>
+            </div>
+            <div>
+                <button type="reset" class="btn btn-success ms-2">
+                    <a href="{% url 'agent.view_task.dashboard' %}" class="text-decoration-none text-white">Back</a>
+                </button>
+            </div>
         </div>
     </form>
 </div>

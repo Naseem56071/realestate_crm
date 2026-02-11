@@ -18,7 +18,7 @@
     </button>
     {% elif request.user.role == 'agent' %}
     <button class="btn btn-success ">
-        <a href="{% url 'agent.view.dashboard' %}" class="text-decoration-none text-white">Back</a>
+        <a href="{% url 'agent.view_task.dashboard' %}" class="text-decoration-none text-white">Back</a>
     </button>
     {% elif request.user.role == 'associate' %}
     <button class="btn btn-success ">

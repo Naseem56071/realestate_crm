@@ -179,7 +179,7 @@
                             href="{% url 'associatetask.dashboard' %}">
                             <i class="bi bi-list-task"></i> <span>Leads</span>
                         </a>
-                        
+
                         {% endif %}
                     </li>
                     {% endif %}
@@ -284,8 +284,8 @@
 
                 <div class="modal-body text-center">
                     {% if request.user.profile_image and request.user.profile_image.name %}
-                    <img src="{{ request.user.profile_image.url }}" class="rounded-circle mb-2" width="120" height="120"
-                        style="object-fit: cover;">
+                    <a href="#"><img src="{{ request.user.profile_image.url }}" class="rounded-circle mb-2" width="120" height="120"
+                        style="object-fit: cover;"></a>
                     {% else %}
                     <form method="post" action="{% url 'upload_profile_image' %}" enctype="multipart/form-data">
                         {% csrf_token %}
@@ -314,7 +314,8 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    
+                    <button class="btn btn-danger"><a class="text-decoration-none text-white" href="{% url 'logout' %}">logout</a></button>
                 </div>
 
             </div>

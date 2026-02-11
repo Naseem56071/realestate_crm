@@ -75,7 +75,7 @@
                 title="Edit lead">
                 view
               </a>
-              {% if perms.accounts.can_update_task %}
+              {% if perms.accounts.can_update_lead %}
 
               <a href="{% url 'agent.update_task.dashboard' lead.id %}" class="btn btn-sm btn-outline-primary me-1"
                 title="Edit lead">
@@ -83,12 +83,15 @@
               </a>
               {% endif %}
               
+                {% if perms.accounts.can_assign_lead %}
 
               <a href="{% url 'agent.assign_lead.dashboard' lead.name %}" class="btn btn-sm btn-outline-success me-1"
                 title="assign lead">
                 assign
               </a>
-              {% if perms.accounts.can_delete_task %}
+              {% endif %}
+
+              {% if perms.accounts.can_delete_lead %}
 
               <a href="{% url 'admin.delete.lead.dashboard' lead.id %}" class="btn btn-sm btn-outline-danger"
                 title="Delete lead">
