@@ -21,6 +21,7 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
 
     path("profile/upload-image/", views.upload_profile_image, name="upload_profile_image"),
+    path('delete/profile/image/',views.delete_profile_image,name='delete.profile.image'),
 
 
     path("dashboard/", views.dashboard, name="dashboard"),

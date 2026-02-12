@@ -1,5 +1,5 @@
 import re
-from django.db.models import Count,Q
+from django.db.models import Count, Q
 from django.utils import timezone
 from datetime import timedelta, datetime, time
 from django.utils.dateparse import parse_datetime
@@ -15,6 +15,7 @@ from accounts.decorators import role_required
 from accounts.utils import send_sms, generate_otp
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import permission_required
+
 
 def contact_us(request):
     if request.method == "POST":
@@ -117,7 +118,7 @@ def phone_login_view(request):
             print("SMS ERROR:", sms_response)
             return redirect("phone.login")
 
-        # 3️ Delete old OTPs
+        # 3️ Delete old OTPs from db
         OTP.objects.filter(phone=phone).delete()
 
         # 4️ Save OTP ONLY after SMS success
@@ -188,7 +189,6 @@ def assign_permissions(request):
     users = User.objects.filter(role__in=["agent", "associate"])
     selected_user = None
     user_permissions = []
-    
 
     task_permissions = [
         ("can_view_lead", "View Lead"),
@@ -264,10 +264,11 @@ def logout_view(request):
 @role_required(['admin'])
 def contact_details(request):
     tasks = Task.objects.all()
-    query = request.GET.get('name',"").strip()
+    query = request.GET.get('name', "").strip()
     if query:
         query = query.lower()
-        tasks = tasks.filter(Q(name__icontains=query)|Q(email__icontains=query))
+        tasks = tasks.filter(Q(name__icontains=query) |
+                             Q(email__icontains=query))
     paginator = Paginator(tasks, 2)  # show 5 records per page
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -326,9 +327,28 @@ def dashboard(request):
 
 @login_required
 def upload_profile_image(request):
-    if request.method == "POST" and request.FILES.get("profile_image"):
-        request.user.profile_image = request.FILES["profile_image"]
+    if request.method == "POST":
+        image = request.FILES.get("profile_image")
+
+        if image:
+            request.user.profile_image = image
+            request.user.save()
+            messages.success(request, "Profile image updated successfully")
+            return redirect(request.path)
+        else:
+            messages.error(request, "Please select a file")
+
+    return render(request, 'accounts/admin/upload_profile_image.html')
+
+
+@login_required
+def delete_profile_image(request):
+    if request.user.profile_image:
+        request.user.profile_image.delete(save=False)
+        request.user.profile_image = None
         request.user.save()
+        messages.success(request, "Profile image deleted successfully.")
+
     return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
@@ -339,7 +359,8 @@ def admin_dashboard_view(request):
     name = request.GET.get('name', '').strip()
     role = request.GET.get('role', '').strip()
     if name:
-        users = users.filter(Q(name__icontains=name) | Q(email__icontains=name))
+        users = users.filter(Q(name__icontains=name) |
+                             Q(email__icontains=name))
     if role:
         users = users.filter(role=role)
 
@@ -363,6 +384,7 @@ def admin_dashboard_view(request):
         "total_associates": total_associates,
     })
 
+
 @role_required(['admin'])
 def toggle_user_status(request, id):
     user = get_object_or_404(User, id=id)
@@ -377,7 +399,6 @@ def toggle_user_status(request, id):
         messages.success(request, "User Deactivated Successfully")
 
     return redirect('admin.dashboard')
-        
 
 
 @role_required(["admin"])
@@ -740,7 +761,7 @@ def agent_view_task(request):
 
 @login_required
 @role_required(["agent"])
-@permission_required('accounts.can_assign_lead',raise_exception=True)
+@permission_required('accounts.can_assign_lead', raise_exception=True)
 def agent_assign_task(request, name):
     associates = User.objects.filter(
         role="associate",
@@ -879,8 +900,8 @@ def add_products(request):
 
 
 @login_required
-@role_required(['admin','agent'])
-@permission_required("accounts.view_product",raise_exception=True)
+@role_required(['admin', 'agent'])
+@permission_required("accounts.view_product", raise_exception=True)
 def list_products(request):
     if not request.user.has_perm("accounts.view_product"):
         return HttpResponse("You dont have permissoin to view this page")

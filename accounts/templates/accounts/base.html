@@ -283,17 +283,32 @@
                 </div>
 
                 <div class="modal-body text-center">
-                    {% if request.user.profile_image and request.user.profile_image.name %}
-                    <a href="#"><img src="{{ request.user.profile_image.url }}" class="rounded-circle mb-2" width="120" height="120"
-                        style="object-fit: cover;"></a>
-                    {% else %}
-                    <form method="post" action="{% url 'upload_profile_image' %}" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <label class="d-block mb-2 text-muted">Upload profile image</label>
-                        <input type="file" name="profile_image" class="form-control mb-2" accept="image/*" required>
-                        <button class="btn btn-sm btn-primary">Upload</button>
-                    </form>
-                    {% endif %}
+                    <div class="profile-image-wrapper position-relative d-inline-block">
+
+                        {% if request.user.profile_image %}
+                        <img src="{{ request.user.profile_image.url }}" width="120" height="120"
+                            class="rounded-circle profile-image" alt="profile image">
+
+                        <!-- Hover Overlay -->
+                        <div class="image-overlay d-flex justify-content-center align-items-center">
+                            <a href="{% url 'upload_profile_image' %}" class="text-white me-3">
+                                <i class="bi bi-pencil-square fs-4"></i>
+                            </a>
+
+                            <a href="{% url 'delete.profile.image' %}" class="text-white">
+                                <i class="bi bi-trash fs-4"></i>
+                            </a>
+                        </div>
+
+                        {% else %}
+                        <span>No image found. Upload image:</span>
+                        <a href="{% url 'upload_profile_image' %}" class="btn btn-sm btn-primary mt-1">
+                            Upload Image
+                        </a>
+                        {% endif %}
+
+                    </div>
+
 
                     <h5 class="mt-3">
                         {{ request.user.name }}
@@ -314,8 +329,9 @@
                 </div>
 
                 <div class="modal-footer">
-                    
-                    <button class="btn btn-danger"><a class="text-decoration-none text-white" href="{% url 'logout' %}">logout</a></button>
+
+                    <button class="btn btn-danger"><a class="text-decoration-none text-white"
+                            href="{% url 'logout' %}">logout</a></button>
                 </div>
 
             </div>
