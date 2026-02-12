@@ -90,7 +90,7 @@
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Role</label>
                         <select class="form-select" name="role" required>
-                            <option value="" disabled>---Select Role---</option>
+                            <option value="" disabled selected>--- Select Role ---</option>
                             <option value="agent">agent</option>
                         </select>
                     </div>
@@ -152,7 +152,7 @@
                     </option>
 
                     <option value="associate" {% if request.GET.role == 'associate' %}selected{% endif %}>
-                        Associate 
+                        Associate
                     </option>
                 </select>
             </div>
@@ -175,6 +175,7 @@
                     <th>User Name</th>
                     <th>Email</th>
                     <th>Role</th>
+                    <th>Last Login</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -189,6 +190,13 @@
                     <td>{{ user.name|capfirst }}</td>
                     <td>{{ user.email }}</td>
                     <td>{{ user.role|capfirst }}</td>
+                    <td>
+                        {% if user.last_login %}
+                        {{ user.last_login|date:"d- M- Y, h:i A" }}
+                        {% else %}
+                        Never Logged In
+                        {% endif %}
+                    </td>
 
                     <!-- STATUS -->
                     <td>
@@ -200,7 +208,12 @@
                     </td>
 
                     <!-- ACTION -->
-                    <td>
+                    <td class="d-flex justify-content-evenly">
+                        <a href="#" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
+                        <a href="{% url 'activate-ordeactivate.account' user.id %}"
+                            class="btn btn-sm btn-outline-secondary" title="active or deactivte"><i
+                                class="bi bi-power"></i></a>
+
                         <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
                             data-bs-target="#deleteModal{{ user.id }}">
                             <i class="bi bi-trash3"></i>

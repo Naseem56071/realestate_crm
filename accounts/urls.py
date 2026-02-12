@@ -31,6 +31,7 @@ urlpatterns = [
         name="assign_permissions"
     ),
     path('cus_admin/dashboard/', views.admin_dashboard_view, name="admin.dashboard"),
+    path('actiavte/or/deactive/user/<int:id>',views.toggle_user_status,name='activate-ordeactivate.account'),
 
     path("admin/delete/agent/associate/dahboard/<int:id>/",
          views.admin_deletes_agents_associates, name="admin.delete.agent.associate.dashboard"),

@@ -264,11 +264,11 @@ def logout_view(request):
 @role_required(['admin'])
 def contact_details(request):
     tasks = Task.objects.all()
-    query = request.GET.get('name')
+    query = request.GET.get('name',"").strip()
     if query:
         query = query.lower()
-        tasks = tasks.filter(name__icontains=query)
-    paginator = Paginator(tasks, 1)  # show 5 records per page
+        tasks = tasks.filter(Q(name__icontains=query)|Q(email__icontains=query))
+    paginator = Paginator(tasks, 2)  # show 5 records per page
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -362,6 +362,22 @@ def admin_dashboard_view(request):
         "total_agents": total_agents,
         "total_associates": total_associates,
     })
+
+@role_required(['admin'])
+def toggle_user_status(request, id):
+    user = get_object_or_404(User, id=id)
+
+    # Toggle status
+    user.is_active = not user.is_active
+    user.save()
+
+    if user.is_active:
+        messages.success(request, "User Activated Successfully")
+    else:
+        messages.success(request, "User Deactivated Successfully")
+
+    return redirect('admin.dashboard')
+        
 
 
 @role_required(["admin"])

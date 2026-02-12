@@ -22,7 +22,7 @@
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Select User</label>
                 <select name="user_id" class="form-select" onchange="this.form.submit()">
-                    <option value="" disabled selected>-- Choose user --</option>
+                    <option value="" disabled selected>--- Choose user ---</option>
                     {% for user in users %}
                     <option value="{{ user.id }}" {% if selected_user and user.id == selected_user.id %}selected{% endif %}>
                         {{ user.email }} ({{ user.role|title }})
