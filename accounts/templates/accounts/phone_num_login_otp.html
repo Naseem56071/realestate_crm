@@ -18,7 +18,8 @@
                 <span class="input-group-text login-icons">
                     <i class="bi bi-telephone-fill " style="color: #0d6efd;">+91</i>
                 </span>
-                <input type="text" name="phone" class="form-control" placeholder="Enter Phone Number" required>
+                <input type="tel" name="phone" class="form-control" placeholder="Phone Number" pattern="[0-9]{10}"
+                    title="Ten digits code" required>
             </div>
         </div>
 
@@ -27,7 +28,7 @@
             submit
         </button>
     </form>
-   
+
 </div>
 
 {% endblock content %}

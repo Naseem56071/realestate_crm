@@ -35,42 +35,43 @@
                     <!-- Full Name -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Full Name</label>
-                        <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
+                        <input type="text" name="name" class="form-control" placeholder="Full Name" required>
                     </div>
 
                     <!-- Email -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control" placeholder="Enter email" required>
+                        <input type="email" name="email" class="form-control" placeholder="Email Address" required>
                     </div>
 
                     <!-- Phone -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Phone Number</label>
-                        <input type="text" name="phone" class="form-control" placeholder="Enter phone number">
+                        <input type="tel" name="phone" class="form-control" placeholder="Phone Number"
+                            pattern="[0-9]{10}" title="Ten digits code" required>
                     </div>
 
                     <!-- Role -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Role</label>
-                        <select class="form-select" name="role" required>
-                            <option value="" disabled selected>--- Select Role ---</option>
-                            <option value="agent">agent</option>
+                        <select name="role" class="form-select" required>
+                            <option value="agent">Agent</option>
+                            <option value="associate">Associate</option>
                         </select>
                     </div>
 
                     <!-- Password -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control" placeholder="Create password"
-                            required>
+                        <input type="password" name="password" class="form-control" placeholder="Password" required>
+                        <small class="text-muted">Password must be at least 8 characters</small>
                     </div>
 
                     <!-- Confirm Password -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Confirm Password</label>
                         <input type="password" name="confirm-password" class="form-control"
-                            placeholder="Confirm password" required>
+                            placeholder="Confirm Password" required>
                     </div>
 
                 </div>

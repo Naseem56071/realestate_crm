@@ -3,6 +3,11 @@ import random
 import json
 from django.conf import settings
 
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+from django.conf import settings
+
 
 def send_sms(phone, otp):
     url = "https://smslogin.co/v3/api.php"
@@ -37,6 +42,37 @@ def generate_otp():
     return str(random.randint(100000, 999999))
 
 
+def lead_email_send(task):
+    dashboard_url = settings.SITE_URL + "/agent/dashboard/"
+    if not task.agent or not task.agent.email:
+        return False  # no agent email → do nothing
 
+    agent_email = task.agent.email
+
+    context = {
+        "agent_name": task.agent.name,
+        "lead_name": task.name,
+        "lead_email": task.email,
+        "lead_phone": task.phone,
+        "lead_message": task.description,
+        "dashboard_url": dashboard_url,
+    }
+
+    # Plain text version
+    text_content = render_to_string("accounts/emails/lead_assigned.txt", context)
+
+    # HTML version
+    html_content = render_to_string("accounts/emails/lead_assigned.html", context)
+
+    msg = EmailMultiAlternatives(
+        subject="New Lead Assigned To You",
+        body=text_content,
+        from_email=settings.DEFAULT_FROM_EMAIL,   # uses DEFAULT_FROM_EMAIL
+        to=[agent_email],
+    )
+   
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+    return True
 
 

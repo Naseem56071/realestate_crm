@@ -1,5 +1,5 @@
 {% extends "accounts/base.html" %}
-{% block title %} <title>edit agent & associate dashboard</title>{% endblock title %}
+{% block title %} <title>edit agent & associate details</title>{% endblock title %}
 {% block heading %}
 <h3 class="ps-2">Admin :</h3>
 {% endblock %}
@@ -9,23 +9,24 @@
 <div class="container assign_task  mt-4">
     <h3 class="update_title">Edit or Update Details</h3>
 
-    <form method="POST" action="">
+    <form method="POST" action="" enctype="multipart/form-data">
         {% csrf_token %}
 
         <!-- Task Title -->
         <div class="mb-3">
             <label class="form-label form_label">Enter or edit Name:</label>
-            <input type="text" name="name" value="{{ edit_user_details.name }}" class="form-control" required>
+            <input type="text" name="name" class="form-control" value="{{ edit_user_details.name }}" required>
         </div>
 
         <div class="mb-3">
             <label class="form-label form_label">Enter or edit Phone:</label>
-            <input type="number" name="phone" value="{{ edit_user_details.phone }}" class="form-control" required>
+            <input type="text" name="phone" class="form-control" value="{{ edit_user_details.phone }}"
+                pattern="[0-9]{10}" title="Ten digits code" required>
         </div>
 
         <div class="mb-3">
             <label class="form-label form_label">Enter or edit Email:</label>
-            <input type="email" name="email" value="{{ edit_user_details.email }}" class="form-control" required>
+            <input type="email" name="email" class="form-control" value="{{ edit_user_details.email }}" required>
         </div>
         {% if edit_user_details.profile_image %}
         <div class="mb-3">

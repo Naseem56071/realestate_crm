@@ -12,9 +12,10 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from accounts.models import User, Task, TaskHistory, Properties, OTP
 from accounts.decorators import role_required
-from accounts.utils import send_sms, generate_otp
+from accounts.utils import send_sms, generate_otp,lead_email_send
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import permission_required
+from django.core.mail import send_mail
 
 
 def contact_us(request):
@@ -31,7 +32,7 @@ def contact_us(request):
         agent = (User.objects.filter(role="agent").annotate(
             task_count=Count("agent_tasks")).order_by("task_count", "id").first())
 
-        Task.objects.create(
+        task =Task.objects.create(
             name=name,
             email=email,
             phone=phone,
@@ -39,6 +40,7 @@ def contact_us(request):
             agent=agent,
 
         )
+        lead_email_send(task)
 
         messages.success(request, "Your message has been sent successfully!")
         return redirect("contact")
@@ -512,7 +514,7 @@ def create_lead(request):
         agent = (User.objects.filter(role="agent").annotate(
             task_count=Count("agent_tasks")).order_by("task_count", "id").first())
 
-        Task.objects.create(
+        task=Task.objects.create(
             name=name,
             email=email,
             phone=phone,
@@ -520,6 +522,7 @@ def create_lead(request):
             agent=agent,
 
         )
+        lead_email_send(task)
 
         messages.success(request, "Your message has been sent successfully!")
         return redirect("admin.lead_details.dashboard")
@@ -730,7 +733,7 @@ def agent_create_associate(request):
         associate.created_by = request.user   # agent
         associate.save()
         messages.success(request, "associate created successfully")
-        return redirect("agent.view.dashboard")
+        return redirect("agent.dashboard")
 
     return render(request,'accounts/agent/create_associate_account.html')
 

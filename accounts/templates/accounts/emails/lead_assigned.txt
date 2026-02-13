@@ -1,0 +1,16 @@
+Hello {{ agent_name }},
+
+A new lead has been assigned to you.
+
+Lead Details:
+-------------------------
+Name   : {{ lead_name }}
+Email  : {{ lead_email }}
+Phone  : {{ lead_phone }}
+
+Message:
+{{ lead_message }}
+
+Please login to the dashboard to respond to the lead.
+
+Thank you.
