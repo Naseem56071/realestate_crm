@@ -1,0 +1,79 @@
+{% extends "accounts/base.html" %}
+{% block title %} <title>create associate account</title>{% endblock title %}
+{% block heading %}
+<h3 class="ps-2">Create Associate :</h3>
+{% endblock %}
+
+{% block content_start %}
+
+<div class="container">
+
+<div class="card table-card mt-4">
+
+
+    <div class="card-header bg-primary text-white">
+        Create Associate
+    </div>
+
+    <div class="card-body">
+        <form method="POST" action="{% url 'create.associate.account' %}">
+
+
+
+            <!-- Django CSRF -->
+            {% csrf_token %}
+
+            <div class="row">
+
+                <!-- Full Name -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="Enter email" required>
+                </div>
+
+                <!-- Phone -->
+                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="text" name="phone" class="form-control" placeholder="Enter phone number">
+                                </div>
+
+                <!-- Role -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Role</label>
+                    <select class="form-select form-control" name="role" required>
+                        <option value="" disabled selected>--- Select Role ---</option>
+                        <option value="associate">associate</option>
+                    </select>
+                </div>
+
+                <!-- Password -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="Create password" required>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" name="confirm-password" class="form-control" placeholder="Confirm password"
+                        required>
+                </div>
+
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex justify-content-end">
+                <button type="reset" class="btn btn-secondary me-2">Reset</button>
+                <button type="submit" class="btn btn-success">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+{% endblock %}

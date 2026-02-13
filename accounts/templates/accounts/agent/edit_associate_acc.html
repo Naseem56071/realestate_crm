@@ -1,0 +1,70 @@
+{% extends "accounts/base.html" %}
+{% block title %} <title>edit associate details</title>{% endblock title %}
+{% block heading %}
+<h3 class="ps-2">Agent :</h3>
+{% endblock %}
+
+{% block content_start %}
+
+<div class="container assign_task  mt-4">
+    <h3 class="update_title">Edit or Update Details</h3>
+
+    <form method="POST" action="">
+        {% csrf_token %}
+
+        <!-- Task Title -->
+        <div class="mb-3">
+            <label class="form-label form_label">Enter or edit Name:</label>
+            <input type="text" name="name" value="{{ edit_associate.name }}" class="form-control" >
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label form_label">Enter or edit Phone:</label>
+            <input type="number" name="phone" value="{{ edit_associate.phone }}" class="form-control" >
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label form_label">Enter or edit Email:</label>
+            <input type="email" name="email" value="{{ edit_associate.email }}" class="form-control" >
+        </div>
+        {% if edit_associate.profile_image %}
+        
+            <label><strong>Current Image :</strong></label><br>
+            <img src="{{ edit_associate.profile_image.url }}" alt="Product Image"
+                style="max-width:150px; height:auto;" class="mb-2">
+        </div>
+        {% else %}
+        <div class="mb-3">
+            <label><strong>no image found :</strong></label><br>
+            <input type="file" name="image" class="form-control">
+        </div>
+        {% endif %}
+
+        <div class="mb-3">
+            <label><strong>Change Image :</strong></label>
+            <input type="file" name="image" class="form-control">
+        </div>
+
+        <!-- Buttons -->
+        <div class="submit_reset d-flex justify-content-between">
+            <div>
+                <button type="submit" class="btn btn-primary">
+                    Update
+                </button>
+
+                <button type="reset" class="btn btn-secondary ms-2">
+                    Reset
+                </button>
+            </div>
+
+
+            <div>
+                <button class="btn btn-success ms-2">
+                    <a href="{% url 'agent.view.dashboard' %}" style="text-decoration: none; color:white">Back</a>
+                </button>
+            </div>
+        </div>
+
+    </form>
+</div>
+{% endblock %}

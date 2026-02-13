@@ -41,97 +41,19 @@
 
     </div>
 </div>
-<div class="container">
-
-    <div class="card table-card mt-4">
 
 
-        <div class="card-header bg-primary text-white">
-            Create Agent
-        </div>
-
-        <div class="card-body">
-            <form method="POST" action="{% url 'create.agent.account' %}">
-
-                {% if messages %}
-                {% for message in messages %}
-                {% if message.tags == 'error' %}
-                <div class="alert alert-danger alert-dismissible fade show auto-dismiss" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endif %}
-                {% endfor %}
-                {% endif %}
-                <!-- Django CSRF -->
-                {% csrf_token %}
-
-                <div class="row">
-
-                    <!-- Full Name -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Full Name</label>
-                        <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
-                    </div>
-
-                    <!-- Email -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control" placeholder="Enter email" required>
-                    </div>
-
-                    <!-- Phone -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Phone Number</label>
-                        <input type="text" name="phone" class="form-control" placeholder="Enter phone number">
-                    </div>
-
-                    <!-- Role -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Role</label>
-                        <select class="form-select" name="role" required>
-                            <option value="" disabled selected>--- Select Role ---</option>
-                            <option value="agent">agent</option>
-                        </select>
-                    </div>
-
-                    <!-- Password -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control" placeholder="Create password"
-                            required>
-                    </div>
-
-                    <!-- Confirm Password -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Confirm Password</label>
-                        <input type="password" name="confirm-password" class="form-control"
-                            placeholder="Confirm password" required>
-                    </div>
-
-                    <!-- Status -->
-                    <!-- <div class="col-md-6 mb-3">
-                                    <label class="form-label">Status</label>
-                                    <select class="form-select">
-                                        <option value="active">Active</option>
-                                        <option value="inactive">Inactive</option>
-                                    </select>
-                                </div> -->
-
-                </div>
-
-                <!-- Buttons -->
-                <div class="d-flex justify-content-end">
-                    <button type="submit" class="btn btn-success me-2">Create User</button>
-                    <button type="reset" class="btn btn-secondary ">Reset</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 <!-- all agents and associate table-->
 <div class="container mt-5">
+    <div class="d-flex justify-content-between">
     <h3 class="mb-4">All Agents & Associates Details:</h3>
+    <div>
+    <a href="{% url 'create.agent.account' %}" 
+       class="btn btn-sm btn-primary">
+        <i class="bi bi-plus-square"></i> Create Agent Account
+    </a>
+</div>
+    </div>
 
     <div class="mb-3">
         <form method="GET" class="row g-2 align-items-center">
@@ -209,7 +131,7 @@
 
                     <!-- ACTION -->
                     <td class="d-flex justify-content-evenly">
-                        <a href="#" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
+                        <a href="{% url 'admin.updates.agent-associate' user.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
                         <a href="{% url 'activate-ordeactivate.account' user.id %}"
                             class="btn btn-sm btn-outline-secondary" title="active or deactivte"><i
                                 class="bi bi-power"></i></a>

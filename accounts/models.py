@@ -101,7 +101,7 @@ class Task(models.Model):
 
     name = models.CharField(max_length=100)
     email = models.EmailField(blank=True, default="")
-    phone = models.CharField(max_length=20, default="")
+    phone = models.CharField(max_length=10, default="")
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
 

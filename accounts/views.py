@@ -57,8 +57,8 @@ def login_view(request):
             return redirect("associate.dashboard")  # associate route
 
     if request.method == "POST":
-        email = request.POST.get("email")
-        password = request.POST.get("password")
+        email = request.POST.get("email","").strip()
+        password = request.POST.get("password","").strip()
         try:
             user_obj = User.objects.get(email=email)
             print(
@@ -371,7 +371,7 @@ def admin_dashboard_view(request):
     total_agents = User.objects.filter(role="agent").count()
     total_associates = User.objects.filter(role='associate').count()
 
-    paginator = Paginator(users, 1)  # show 5 records per page
+    paginator = Paginator(users, 2)  # show 5 records per page
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -383,6 +383,28 @@ def admin_dashboard_view(request):
         "total_agents": total_agents,
         "total_associates": total_associates,
     })
+
+@login_required
+def update_associate_and_agent(request,user_id):
+    edit_user_details=get_object_or_404(User,id=user_id)
+    if request.method == 'POST':
+        name=request.POST.get('name')
+        phone=request.POST.get('phone')
+        email=request.POST.get('email')
+        image=request.FILES.get('image')
+
+        edit_user_details.name=name
+        edit_user_details.phone=phone
+        edit_user_details.email=email
+        if image:
+            edit_user_details.profile_image=image
+        edit_user_details.save()
+        messages.success(request, "Agent and Associate details Updated Successfully")
+        return redirect("admin.dashboard")
+
+    
+    return render(request,'accounts/admin/edit_associate_agent.html',{'edit_user_details':edit_user_details})
+
 
 
 @role_required(['admin'])
@@ -600,9 +622,9 @@ def admin_create_agent(request):
         )
 
         messages.success(request, "Agent created successfully")
-        return redirect("dashboard")
+        return redirect("admin.dashboard")
 
-    return redirect("dashboard")
+    return render( request,"accounts/admin/create_agent_account.html")
 
 
 @login_required
@@ -708,10 +730,28 @@ def agent_create_associate(request):
         associate.created_by = request.user   # agent
         associate.save()
         messages.success(request, "associate created successfully")
-        return redirect("agent.dashboard")
+        return redirect("agent.view.dashboard")
 
-    return redirect("agent.dashboard")
+    return render(request,'accounts/agent/create_associate_account.html')
 
+def update_associate(request,id):
+    edit_associate=get_object_or_404(User,id=id)
+    if request.method == 'POST':
+        name=request.POST.get('name')
+        phone=request.POST.get('phone')
+        email=request.POST.get('email')
+        image=request.POST.get('image')
+
+        edit_associate.name=name
+        edit_associate.phone=phone
+        edit_associate.email=email
+        if image:
+            edit_associate.profile_image=image
+        edit_associate.save()
+        messages.success(request,'update associate details successfully')
+        return redirect('agent.view.dashboard')
+        
+    return render(request,"accounts/agent/edit_associate_acc.html",{"edit_associate":edit_associate})
 
 @login_required
 @role_required(["associate"])

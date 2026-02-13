@@ -32,9 +32,11 @@ urlpatterns = [
         name="assign_permissions"
     ),
     path('cus_admin/dashboard/', views.admin_dashboard_view, name="admin.dashboard"),
-    path('actiavte/or/deactive/user/<int:id>',views.toggle_user_status,name='activate-ordeactivate.account'),
 
-    path("admin/delete/agent/associate/dahboard/<int:id>/",
+    path('actiavte/or/deactive/user/<int:id>',views.toggle_user_status,name='activate-ordeactivate.account'),
+    path('cus_admin/update/agent/associate/<int:user_id>/',views.update_associate_and_agent,name='admin.updates.agent-associate'),
+
+    path("cus_admin/delete/agent/associate/dahboard/<int:id>/",
          views.admin_deletes_agents_associates, name="admin.delete.agent.associate.dashboard"),
 
     path("create/agent/account/", views.admin_create_agent ,
@@ -52,6 +54,7 @@ urlpatterns = [
          views.agent_create_associate,
          name="create.associate.account",
          ),
+     path('agent/update/associate/<int:id>/',views.update_associate,name='agent.update.associate'),
     path("associate/dashboard/", views.associate_dashboard,
          name="associate.dashboard"),
 

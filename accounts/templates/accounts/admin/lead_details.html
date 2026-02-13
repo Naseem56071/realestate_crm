@@ -93,7 +93,7 @@
 
                         <!-- AGENT -->
                         <select name="agent" class="form-select form-select-sm">
-                            <option value="">Choose Agent</option>
+                            <option value="" selected disabled>---Choose Agent---</option>
                             {% for agent in agents %}
                             <option value="{{ agent.id }}" {% if request.GET.agent == agent.id %}selected{% endif %}>
                                 {{ agent.email }}
@@ -103,7 +103,7 @@
 
                         <!-- ASSOCIATE -->
                         <select name="associate" class="form-select form-select-sm">
-                            <option value="">Choose Associate</option>
+                            <option value="" selected disabled>---Choose Associate---</option>
                             {% for associate in associates %}
                             <option value="{{ associate.id }}" {% if request.GET.associate == associate.id %}selected{% endif %}>
                                 {{ associate.email|default:associate.name }}

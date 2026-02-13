@@ -3,7 +3,7 @@ from django.contrib.auth.models import BaseUserManager
 
 class UserManager(BaseUserManager):
 
-    def create_user(self, email, password=None, role=None, name=None):
+    def create_user(self, email, password=None, role=None, name=None,phone=None):
         if not email:
             raise ValueError("Email is required")
         if not name:
@@ -12,7 +12,8 @@ class UserManager(BaseUserManager):
         user = self.model(
             email=self.normalize_email(email),
             role=role,
-            name=name
+            name=name,
+            phone=phone,
         )
         user.set_password(password)
         user.save(using=self._db)
