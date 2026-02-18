@@ -28,7 +28,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -147,4 +147,8 @@ EMAIL_USE_TLS =True
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+
+RAZORPAY_KEY_ID=os.getenv("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET=os.getenv("RAZORPAY_KEY_SECRET")
+RAZORPAY_CALLBACK_URL = "https://dupable-mayola-metagnathous.ngrok-free.dev/payment-verify/"
 

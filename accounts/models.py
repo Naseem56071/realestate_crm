@@ -255,7 +255,13 @@ class Properties(models.Model):
     location = models.CharField(
         max_length=50, choices=CITY_CHOICES, default=None)
     name = models.CharField(max_length=200)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+
+    booking_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=5000
+    )
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -270,3 +276,21 @@ class Properties(models.Model):
             ("change_product", "Update Products"),
             ("delete_product", "Delete Products"),
             ]
+class Payment(models.Model):
+    
+    STATUS_CHOICES = (
+        ("created", "Created"),
+        ("success", "Success"),
+        ("failed", "Failed"),
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product=models.ForeignKey(Properties,on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2,default=None)
+    razorpay_order_id = models.CharField(max_length=200)
+    razorpay_payment_id = models.CharField(max_length=200, blank=True, null=True)
+    razorpay_signature = models.CharField(max_length=500, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="created")
+
+    is_paid = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    

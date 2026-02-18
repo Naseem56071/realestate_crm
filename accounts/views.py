@@ -1,6 +1,8 @@
 import re
+from decimal import Decimal
 from django.db.models import Count, Q
 from django.utils import timezone
+from django.http import JsonResponse
 from datetime import timedelta, datetime, time
 from django.utils.dateparse import parse_datetime
 from django.contrib.auth.decorators import login_required
@@ -10,12 +12,14 @@ from django.contrib import messages
 from django.http.response import HttpResponse
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from accounts.models import User, Task, TaskHistory, Properties, OTP
+from accounts.models import User, Task, TaskHistory, Properties, OTP, Payment
 from accounts.decorators import role_required
-from accounts.utils import send_sms, generate_otp,lead_email_send
+from accounts.utils import send_sms, generate_otp, lead_email_send
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import permission_required
-from django.core.mail import send_mail
+from django.conf import settings
+import razorpay
+from django.views.decorators.csrf import csrf_exempt
 
 
 def contact_us(request):
@@ -32,7 +36,7 @@ def contact_us(request):
         agent = (User.objects.filter(role="agent").annotate(
             task_count=Count("agent_tasks")).order_by("task_count", "id").first())
 
-        task =Task.objects.create(
+        task = Task.objects.create(
             name=name,
             email=email,
             phone=phone,
@@ -59,8 +63,8 @@ def login_view(request):
             return redirect("associate.dashboard")  # associate route
 
     if request.method == "POST":
-        email = request.POST.get("email","").strip()
-        password = request.POST.get("password","").strip()
+        email = request.POST.get("email", "").strip()
+        password = request.POST.get("password", "").strip()
         try:
             user_obj = User.objects.get(email=email)
             print(
@@ -386,27 +390,27 @@ def admin_dashboard_view(request):
         "total_associates": total_associates,
     })
 
-@login_required
-def update_associate_and_agent(request,user_id):
-    edit_user_details=get_object_or_404(User,id=user_id)
-    if request.method == 'POST':
-        name=request.POST.get('name')
-        phone=request.POST.get('phone')
-        email=request.POST.get('email')
-        image=request.FILES.get('image')
 
-        edit_user_details.name=name
-        edit_user_details.phone=phone
-        edit_user_details.email=email
+@login_required
+def update_associate_and_agent(request, user_id):
+    edit_user_details = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+        image = request.FILES.get('image')
+
+        edit_user_details.name = name
+        edit_user_details.phone = phone
+        edit_user_details.email = email
         if image:
-            edit_user_details.profile_image=image
+            edit_user_details.profile_image = image
         edit_user_details.save()
-        messages.success(request, "Agent and Associate details Updated Successfully")
+        messages.success(
+            request, "Agent and Associate details Updated Successfully")
         return redirect("admin.dashboard")
 
-    
-    return render(request,'accounts/admin/edit_associate_agent.html',{'edit_user_details':edit_user_details})
-
+    return render(request, 'accounts/admin/edit_associate_agent.html', {'edit_user_details': edit_user_details})
 
 
 @role_required(['admin'])
@@ -514,7 +518,7 @@ def create_lead(request):
         agent = (User.objects.filter(role="agent").annotate(
             task_count=Count("agent_tasks")).order_by("task_count", "id").first())
 
-        task=Task.objects.create(
+        task = Task.objects.create(
             name=name,
             email=email,
             phone=phone,
@@ -627,7 +631,7 @@ def admin_create_agent(request):
         messages.success(request, "Agent created successfully")
         return redirect("admin.dashboard")
 
-    return render( request,"accounts/admin/create_agent_account.html")
+    return render(request, "accounts/admin/create_agent_account.html")
 
 
 @login_required
@@ -735,26 +739,28 @@ def agent_create_associate(request):
         messages.success(request, "associate created successfully")
         return redirect("agent.dashboard")
 
-    return render(request,'accounts/agent/create_associate_account.html')
+    return render(request, 'accounts/agent/create_associate_account.html')
 
-def update_associate(request,id):
-    edit_associate=get_object_or_404(User,id=id)
+
+def update_associate(request, id):
+    edit_associate = get_object_or_404(User, id=id)
     if request.method == 'POST':
-        name=request.POST.get('name')
-        phone=request.POST.get('phone')
-        email=request.POST.get('email')
-        image=request.POST.get('image')
+        name = request.POST.get('name')
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+        image = request.POST.get('image')
 
-        edit_associate.name=name
-        edit_associate.phone=phone
-        edit_associate.email=email
+        edit_associate.name = name
+        edit_associate.phone = phone
+        edit_associate.email = email
         if image:
-            edit_associate.profile_image=image
+            edit_associate.profile_image = image
         edit_associate.save()
-        messages.success(request,'update associate details successfully')
+        messages.success(request, 'update associate details successfully')
         return redirect('agent.view.dashboard')
-        
-    return render(request,"accounts/agent/edit_associate_acc.html",{"edit_associate":edit_associate})
+
+    return render(request, "accounts/agent/edit_associate_acc.html", {"edit_associate": edit_associate})
+
 
 @login_required
 @role_required(["associate"])
@@ -918,6 +924,8 @@ def associate_update_task(request, id):
     return render(request, 'accounts/associate/update_task.html', {'task': task, 'task_hisrories': task_hisrories})
 
 
+# Product adding ,deleting , listing and updating
+
 @login_required
 @role_required(['admin'])
 def add_products(request):
@@ -999,3 +1007,70 @@ def delete_product(request, id):
         return redirect("dashboard")
 
     return redirect('dashboard')
+
+
+# payment gateway
+client = razorpay.Client(
+    auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+
+def check_out_product(request, product_id):
+    product = get_object_or_404(Properties, id=product_id)
+    return render(request, 'accounts/products/check_out_product.html', {"product": product})
+
+
+@csrf_exempt
+def create_payment(request, product_id):
+    product = get_object_or_404(Properties, id=product_id)
+
+    order_data = {
+        'amount': int(product.booking_amount * 100),
+        'currency': "INR",
+        'payment_capture': "1"
+    }
+    razorpay_order = client.order.create(order_data)
+
+    Payment.objects.create(
+        user=request.user,
+        product=product,
+        amount=product.booking_amount,
+        razorpay_order_id=razorpay_order['id']
+    )
+    return JsonResponse({
+        'order_id': razorpay_order['id'],
+        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+        'product_name': product.name,
+        'amount': order_data["amount"],
+        'razorpay_callback_url': settings.RAZORPAY_CALLBACK_URL
+    })
+
+
+@csrf_exempt
+def payment_verify(request):
+    if 'razorpay_signature' in request.POST:
+        order_id = request.POST.get('razorpay_order_id')
+        payment_id = request.POST.get('razorpay_payment_id')
+        signature = request.POST.get('razorpay_signature')
+
+        payment = get_object_or_404(Payment, razorpay_order_id=order_id)
+
+        if client.utility.verify_payment_signature({
+            'razorpay_order_id': order_id,
+            'razorpay_payment_id': payment_id,
+            'razorpay_signature': signature
+        }):
+            payment.razorpay_order_id=order_id
+            payment.razorpay_payment_id=payment_id
+            payment.razorpay_signature=signature
+            payment.status="success"
+            payment.is_paid=True
+            payment.save()
+            return HttpResponse("payment success")
+        else:
+            payment.status="failed"
+            payment.is_paid=False
+            payment.save()
+            return JsonResponse({'status':'failed'})
+    else:
+        return HttpResponse("payment failed")
+        
