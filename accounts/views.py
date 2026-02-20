@@ -20,6 +20,11 @@ from django.contrib.auth.decorators import permission_required
 from django.conf import settings
 import razorpay
 from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import send_mail
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
 
 
 def contact_us(request):
@@ -94,6 +99,93 @@ def login_view(request):
             return redirect("login")
 
     return render(request, "accounts/login.html")
+
+
+# forgot password
+def forgot_password(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+
+        user = User.objects.filter(email=email).first()
+
+        if user:
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+
+            reset_link = request.build_absolute_uri(
+                reverse('reset_password', kwargs={
+                        'uidb64': uid, 'token': token})
+            )
+
+            send_mail(
+                "Reset Your Password",
+                f"Click the link to reset password:\n{reset_link}",
+                settings.EMAIL_HOST_USER,
+                [email]
+            )
+        # SAME message always
+        messages.success(
+            request, "If this email exists, a reset link was sent to you gmail.")
+        return redirect('forgot_password')
+
+    return render(request, "accounts/forgot.html")
+
+
+# rest password
+
+
+def reset_password(request, uidb64, token):
+
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except Exception as e:
+        user = None
+        print(e)
+
+    if user and default_token_generator.check_token(user, token):
+        if request.method == "POST":
+            password = request.POST.get("password").strip()
+            confirm_password = request.POST.get("confirm_password")
+
+            if password != confirm_password:
+                messages.error(request, "Passwords do not match")
+                return redirect('reset_password')
+
+               # Strong password validation
+            if len(password) < 8:
+                messages.error(
+                    request, "Password must be at least 8 characters")
+                return redirect("reset_password")
+
+            if not re.search(r"[A-Z]", password):
+                messages.error(
+                    request, "Password must contain at least one uppercase letter")
+                return redirect("reset_password")
+
+            if not re.search(r"[a-z]", password):
+                messages.error(
+                    request, "Password must contain at least one lowercase letter")
+                return redirect("reset_password")
+
+            if not re.search(r"[0-9]", password):
+                messages.error(
+                    request, "Password must contain at least one number")
+                return redirect("reset_password")
+
+            if not re.search(r"[!@#$%^&*()_+=\[{\]};:<>|./?,-]", password):
+                messages.error(
+                    request, "Password must contain at least one special character")
+                return redirect("reset_password")
+            user.set_password(password)
+            user.save()
+            messages.success(request, "Password updated. Login now.")
+            return redirect("login")
+
+        return render(request, "accounts/reset_password.html")
+
+    # invalid token
+    return render(request, "accounts/invalid_link.html")
 
 # sends otp
 
@@ -1059,18 +1151,17 @@ def payment_verify(request):
             'razorpay_payment_id': payment_id,
             'razorpay_signature': signature
         }):
-            payment.razorpay_order_id=order_id
-            payment.razorpay_payment_id=payment_id
-            payment.razorpay_signature=signature
-            payment.status="success"
-            payment.is_paid=True
+            payment.razorpay_order_id = order_id
+            payment.razorpay_payment_id = payment_id
+            payment.razorpay_signature = signature
+            payment.status = "success"
+            payment.is_paid = True
             payment.save()
             return HttpResponse("payment success")
         else:
-            payment.status="failed"
-            payment.is_paid=False
+            payment.status = "failed"
+            payment.is_paid = False
             payment.save()
-            return JsonResponse({'status':'failed'})
+            return JsonResponse({'status': 'failed'})
     else:
         return HttpResponse("payment failed")
-        

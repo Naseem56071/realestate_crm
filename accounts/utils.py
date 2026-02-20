@@ -2,11 +2,8 @@ import requests
 import random
 import json
 from django.conf import settings
-
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from django.http import HttpResponse
-from django.conf import settings
 
 
 def send_sms(phone, otp):
@@ -74,5 +71,4 @@ def lead_email_send(task):
     msg.attach_alternative(html_content, "text/html")
     msg.send()
     return True
-
-
+  

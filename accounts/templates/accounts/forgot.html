@@ -1,0 +1,21 @@
+{% extends "accounts/login.html" %}
+{% block title %}<title>Forgot Password</title>{% endblock %}
+
+{% block content %}
+<div class="card-body p-4">
+    <p class="text-center m-0">Reset Password</p>
+    <p class="text-center text-muted">Enter your registered email</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label"><strong>Email :</strong> </label>
+            <input type="email" name="email" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+            Send Reset Link
+        </button>
+    </form>
+</div>
+{% endblock %}
